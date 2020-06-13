@@ -1,3 +1,3 @@
-# Sarjom
+# Collect
 
-Name : Sarjom is the name given to the tree Shorea robusta in the ho language.
+Add code here for sending/uploading the datasets
