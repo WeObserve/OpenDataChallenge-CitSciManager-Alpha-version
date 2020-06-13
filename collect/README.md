@@ -1,3 +1,3 @@
 # Collect
 
-Add code here for sending/uploading the datasets
+Add code here for downloading the data and meta-data from the fileserver.
