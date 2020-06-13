@@ -1,2 +1,5 @@
 backend/venv/
 backend/.idea/
+.idea/
+aws_config.py
+backend/__pycache__/
