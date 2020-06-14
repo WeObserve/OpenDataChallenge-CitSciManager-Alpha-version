@@ -12,20 +12,39 @@ app = flask.Flask(__name__)
 
 app.config["DEBUG"] = True
 
-def validate_request(request, request_type):
+def validate_request(request, request_type, request_body_type):
     request_validity = {
         "is_valid": True,
         "reason": None
     }
 
-    # check if uuid is present in request body
-    if "uuid" not in request.form:
-        request_validity["is_valid"] = False
-        request_validity["reason"] = "UUID is amandatory"
-        return request_validity
+    uuid = None
 
-    # get uuid from the request body
-    uuid = request.form["uuid"]
+    if request_body_type == "form":
+        # check if uuid is present in request body
+        if "uuid" not in request.form:
+            request_validity["is_valid"] = False
+            request_validity["reason"] = "UUID is amandatory"
+            return request_validity
+
+        # get uuid from the request body
+        uuid = request.form["uuid"]
+    elif request_body_type == "json":
+        if not request.is_json:
+            request_validity["is_valid"] = False
+            request_validity["reason"] = "request should be a valid json"
+            return request_validity
+
+        request_body = request.get_json()
+
+        # check if uuid is present in request body
+        if request_body is None or "uuid" not in request_body:
+            request_validity["is_valid"] = False
+            request_validity["reason"] = "UUID is amandatory"
+            return request_validity
+
+        # get uuid from the request body
+        uuid = request_body["uuid"]
 
     if uuid is None or len(uuid) == 0:
         request_validity["is_valid"] = False
@@ -47,10 +66,10 @@ def validate_request(request, request_type):
     #look for the given uuid
     for user in users:
         if user["uuid"] == uuid:
-            if (user["type"] == "sender" and request_type == "UPLOAD_FILES"):
+            if (user["type"] == "sender" and request_type in ("UPLOAD_FILES", "VIEW_DATASTORIES")):
                 request_validity["user"] = user
                 return request_validity
-            elif (user["type"] == "collector" and request_type in ("DOWNLOAD_FILES", "INVITE_USERS")):
+            elif (user["type"] == "collector" and request_type in ("DOWNLOAD_FILES", "INVITE_USERS", "CREATE_DATASTORY", "VIEW_DATASTORIES")):
                 request_validity["user"] = user
                 return request_validity
             else:
@@ -258,7 +277,7 @@ def process_invite_users(request, user):
         process_response["message"] = str(e)
         return process_response
 
-def process_download_response(request):
+def process_download_file(request):
     process_response = {
         "status": "SUCCESS",
         "is_success": True,
@@ -288,6 +307,90 @@ def process_download_response(request):
             files_to_be_downloaded.append(file)
 
     process_response["files"] = files_to_be_downloaded
+
+    return process_response
+
+def process_create_datastory(request, user):
+    process_response = {
+        "status": "SUCCESS",
+        "is_success": True
+    }
+
+    if ("datastory_name" not in request.form or len(request.form["datastory_name"]) == 0
+        or "datastory_content" not in request.form or len(request.form["datastory_content"]) == 0):
+        return {
+            "status": "FAILED",
+            "is_success": False,
+            "message": "datastory_name and datastory_content are mandatory"
+        }
+
+    # load datastories_table
+    datastories = json.load(
+        open("./db/datastories_table.json", "r"))
+
+    user_creating_datastory = user
+
+    datastories_created_for_this_project = []
+
+    # collect datastory names of datastories created for this project
+    for datastory in datastories:
+        if datastory["project_id"] == user_creating_datastory["project_id"]:
+            datastories_created_for_this_project.append(datastory["name"])
+
+    if (request.form["datastory_name"] in datastories_created_for_this_project):
+        return {
+            "status": "FAILED",
+            "is_success": False,
+            "message": "a datastory by this name already exists for this project"
+        }
+
+    datastory_to_be_created = {
+        "name": request.form["datastory_name"],
+        "content": request.form["datastory_content"],
+        "project_id": user_creating_datastory["project_id"],
+        "user_uuid": user_creating_datastory["uuid"]
+    }
+
+    datastories.append(datastory_to_be_created)
+
+    json.dump(datastories, open("./db/datastories_table.json", "w"))
+
+    return process_response
+
+def process_view_datastory(request, user):
+    process_response = {
+        "status": "SUCCESS",
+        "is_success": True
+    }
+
+    request_body = request.get_json()
+
+    if (("get_all_datastories" not in request_body or not request_body["get_all_datastories"]) and ("datastory_name" not in request_body or len(request_body["datastory_name"]) == 0)):
+        process_response["status"] = "FAILED"
+        process_response["is_success"] = False
+        process_response["message"] = "request body must have either get_all_datastories field set to true or must have a non empty datastory_name field"
+
+    # load datastories_table
+    datastories = json.load(
+        open("./db/datastories_table.json", "r"))
+
+    user_viewing_datastory = user
+
+    datastories_created_for_this_project = []
+
+    # collect datastory names of datastories created for this project
+    for datastory in datastories:
+        if datastory["project_id"] == user_viewing_datastory["project_id"]:
+            datastories_created_for_this_project.append(datastory)
+
+    if ("get_all_datastories" in request_body and request_body["get_all_datastories"]):
+        process_response["datastories"] = datastories_created_for_this_project
+    else:
+        datastories_with_given_name = []
+        for datastory in datastories_created_for_this_project:
+            if datastory["name"] == request_body["datastory_name"]:
+                datastories_with_given_name.append(datastory)
+        process_response["datastories"] = datastories_with_given_name
 
     return process_response
 
@@ -323,7 +426,7 @@ def download_files():
         "error_response": None
     }
 
-    request_validity = validate_request(request, "DOWNLOAD_FILES")
+    request_validity = validate_request(request, "DOWNLOAD_FILES", "form")
 
     if (not request_validity["is_valid"]):
         response["error_response"] = {
@@ -332,7 +435,7 @@ def download_files():
 
         return json.dumps(response)
 
-    process_response = process_download_response(request)
+    process_response = process_download_file(request)
 
     if process_response["is_success"]:
         response["success_response"] = process_response
@@ -348,7 +451,7 @@ def invite_users():
         "error_response": None
     }
 
-    request_validity = validate_request(request, "INVITE_USERS")
+    request_validity = validate_request(request, "INVITE_USERS", "form")
 
     if (not request_validity["is_valid"]):
         response["error_response"] = {
@@ -358,6 +461,56 @@ def invite_users():
         return json.dumps(response)
 
     process_response = process_invite_users(request, request_validity["user"])
+
+    if process_response["is_success"]:
+        response["success_response"] = process_response
+    else:
+        response["error_response"] = process_response
+
+    return response
+
+@app.route('/datastories', methods=["POST"])
+def create_datastory():
+    response = {
+        "success_response": None,
+        "error_response": None
+    }
+
+    request_validity = validate_request(request, "CREATE_DATASTORY", "form")
+
+    if (not request_validity["is_valid"]):
+        response["error_response"] = {
+            "request_validity": request_validity
+        }
+
+        return json.dumps(response)
+
+    process_response = process_create_datastory(request, request_validity["user"])
+
+    if process_response["is_success"]:
+        response["success_response"] = process_response
+    else:
+        response["error_response"] = process_response
+
+    return response
+
+@app.route('/datastories/view', methods=["POST"])
+def view_datastory():
+    response = {
+        "success_response": None,
+        "error_response": None
+    }
+
+    request_validity = validate_request(request, "VIEW_DATASTORIES", "json")
+
+    if (not request_validity["is_valid"]):
+        response["error_response"] = {
+            "request_validity": request_validity
+        }
+
+        return json.dumps(response)
+
+    process_response = process_view_datastory(request, request_validity["user"])
 
     if process_response["is_success"]:
         response["success_response"] = process_response
