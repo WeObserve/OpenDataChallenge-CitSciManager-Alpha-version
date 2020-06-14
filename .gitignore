@@ -1,4 +1,5 @@
 backend/venv/
+backend/trial_data/
 backend/.idea/
 .idea/
 aws_config.py

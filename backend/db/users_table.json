@@ -1,16 +1,1 @@
-[
-  {
-    "email": "anindyapandey@gmail.com",
-    "uuid": "1234567891011121",
-    "name": "test",
-    "type": "sender",
-    "project_id": "P001"
-  },
-  {
-    "email": "anindyapandey@gmail.com",
-    "uuid": "1234567891011122",
-    "name": "test",
-    "type": "collector",
-    "project_id": "P001"
-  }
-]
+[{"email": "anindyapandey@gmail.com", "uuid": "1234567891011121", "name": "test", "type": "sender", "project_id": "P001"}, {"email": "anindyapandey@gmail.com", "uuid": "1234567891011122", "name": "test", "type": "collector", "project_id": "P001"}, {"email": "anindyapandey@gmail.com", "uuid": "1234567891011123", "name": "test", "type": "collector", "project_id": "P002"}, {"name": "shiva-test", "email": "anindyapandey@gmail.com", "type": "sender", "project_id": "P002", "uuid": "f88e1b54ae3211eab23b98460a987c24"}]
