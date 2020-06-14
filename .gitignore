@@ -4,3 +4,4 @@ backend/.idea/
 .idea/
 aws_config.py
 backend/__pycache__/
+logs/
