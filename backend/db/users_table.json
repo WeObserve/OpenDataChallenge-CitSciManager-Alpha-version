@@ -5,5 +5,12 @@
     "name": "test",
     "type": "sender",
     "project_id": "P001"
+  },
+  {
+    "email": "anindyapandey@gmail.com",
+    "uuid": "1234567891011122",
+    "name": "test",
+    "type": "collector",
+    "project_id": "P001"
   }
 ]

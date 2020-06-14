@@ -10,12 +10,7 @@ app = flask.Flask(__name__)
 
 app.config["DEBUG"] = True
 
-@app.route('/', methods=["GET"])
-def home():
-    return "wow"
-
-
-def validate_request(request):
+def validate_request(request, request_type):
     request_validity = {
         "is_valid": True,
         "reason": None
@@ -50,7 +45,12 @@ def validate_request(request):
     #look for the given uuid
     for user in users:
         if user["uuid"] == uuid:
-            return request_validity
+            if (user["type"] == "sender" and request_type == "UPLOAD_FILES") or (user["type"] == "collector" and request_type == "DOWNLOAD_FILES"):
+                return request_validity
+            else:
+                request_validity["is_valid"] = False
+                request_validity["reason"] = "user cannot perform requested action"
+                return request_validity
 
     request_validity["is_valid"] = False
     request_validity["reason"] = "uuid is invalid"
@@ -143,6 +143,39 @@ def process_upload_file(request):
 
     return process_response
 
+def process_download_response(request):
+    process_response = {
+        "status": "SUCCESS",
+        "is_success": True,
+        "files": []
+    }
+
+    # load users_table
+    users = json.load(
+        open("./db/users_table.json", "r"))
+
+    user_downloading_files = None
+
+    # look for the given uuid
+    for user in users:
+        if user["uuid"] == request.form["uuid"]:
+            user_downloading_files = user
+
+    # load files_table
+    files = json.load(open("./db/files_table.json", "r"))
+
+    files_to_be_downloaded = []
+
+    #filter files by project id
+    for file in files:
+        if file["project"] == user_downloading_files["project_id"]:
+            file["s3_link"] = "https://greendub-uploaded-files-mvp.s3-us-west-2.amazonaws.com/" + file["s3_file_path"]
+            files_to_be_downloaded.append(file)
+
+    process_response["files"] = files_to_be_downloaded
+
+    return process_response
+
 @app.route('/file', methods=["POST"])
 def upload_file():
     response = {
@@ -150,7 +183,7 @@ def upload_file():
         "error_response": None
     }
 
-    request_validity = validate_request(request)
+    request_validity = validate_request(request, "UPLOAD_FILES")
 
     if (not request_validity["is_valid"]):
         response["error_response"] = {
@@ -160,6 +193,31 @@ def upload_file():
         return json.dumps(response)
 
     process_response = process_upload_file(request)
+
+    if process_response["is_success"]:
+        response["success_response"] = process_response
+    else:
+        response["error_response"] = process_response
+
+    return response
+
+@app.route('/file', methods=["GET"])
+def download_file():
+    response = {
+        "success_response": None,
+        "error_response": None
+    }
+
+    request_validity = validate_request(request, "DOWNLOAD_FILES")
+
+    if (not request_validity["is_valid"]):
+        response["error_response"] = {
+            "request_validity": request_validity
+        }
+
+        return json.dumps(response)
+
+    process_response = process_download_response(request)
 
     if process_response["is_success"]:
         response["success_response"] = process_response
