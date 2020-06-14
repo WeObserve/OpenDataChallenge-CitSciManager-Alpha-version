@@ -17,7 +17,7 @@ def upload_files():
         "error_response": None
     }
 
-    request_validity = validate_request(request, "UPLOAD_FILES")
+    request_validity = validate_request(request, "UPLOAD_FILES", "form")
 
     if (not request_validity["is_valid"]):
         response["error_response"] = {
