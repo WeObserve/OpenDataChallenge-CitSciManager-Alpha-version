@@ -100,10 +100,10 @@
     <div class="container-narrow">
       <div class="masthead">
         <ul class="nav nav-pills pull-right">
-          <li>
+          <li class="active">
             <a href="index.html">Home</a>
           </li>
-          <li class="active">
+          <li>
             <a href="about.html">About Us</a>
           </li>
           <li>
@@ -120,15 +120,86 @@
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="index.html">Home</a> >></li>
-            <li class="breadcrumb-item">
-              <a href="about.html">About Us</a>
-            </li>
+            <li class="breadcrumb-item"><a href="send.html">Send Data</a></li>
           </ol>
         </nav>
         <hr />
-        <h1>About Us</h1>
+        <form>
+          <div class="form-group">
+            <label for="exampleInputEmail1"
+              >Enter your registered email address</label
+            >
+            <input
+              type="email"
+              class="form-control"
+              id="exampleInputEmail1"
+              aria-describedby="emailHelp"
+              placeholder="Enter email"
+            />
+          </div>
+          <div class="form-group">
+            <label for="exampleInputPassword1"
+              >Citizen Science Invite Code</label
+            >
+            <input
+              type="password"
+              class="form-control"
+              id="exampleInputPassword1"
+              placeholder="Copy/Paste 16-digit invite code"
+            />
+          </div>
+          <div class="form-check">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              id="exampleCheck1"
+            />
+            <label class="form-check-label" for="exampleCheck1"
+              >Save my information for future</label
+            >
+          </div>
+        </form>
         <hr />
-        <p>Project Info, Team, Faculty</p>
+        <div class="d-flex bd-highlight">
+          <div class="p-2 flex-fill bd-highlight">
+            <input
+              id="file-upload"
+              type="file"
+              multiple="multiple"
+              class="opacity-0 w-0 h-0 appearance-none overflow-hidden"
+            />
+            <br />
+            <label
+              role="button"
+              title="Select files to upload"
+              for="file-upload"
+              class="btn rounded-lg flex items-center mt-4"
+              >Select files to upload</label
+            >
+          </div>
+          <div class="p-2 flex-fill bd-highlight">
+            <p>
+              You should have received an orientation training before being
+              added into a project. There will be some options available to you
+              once you upload your datasets. In case, you face any issues, feel
+              free to reach out to us greendubs2020@gmail.com
+            </p>
+          </div>
+        </div>
+        <hr />
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="exampleCheck1" />
+          <label class="form-check-label" for="exampleCheck1"
+            >I agree to
+            <a href="terms-conditions.html" target="_terms-conditions"></a>terms
+            and conditions</label
+          >
+        </div>
+        <br />
+        <a href="send-success.html"
+          ><button type="submit" class="btn btn-primary">Send/Upload</button></a
+        >
+
         <hr />
       </body>
       <div class="footer">
