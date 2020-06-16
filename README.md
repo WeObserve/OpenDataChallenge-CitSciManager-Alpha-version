@@ -13,18 +13,16 @@ http://www.citsci.earth/join-us.html
 ## Current Team
 The current team for summer sprint includes
 
-Turam Purty - Lead Researcher
-Vighesh Misal - Application Developer
-Ashish Anand - Product & Sustainability Manager
-Liam Albright - Full Stack Developer & Designer
-Divit Jawa - Front end Application Developer
+*[Turam Purty](http://turam.github.io/) - Lead Researcher
+*[Vighesh Misal](https://www.linkedin.com/in/vighnesh-misal/) - Application Developer
+*[Ashish Anand](https://www.linkedin.com/in/ashishanand9/) - Product & Sustainability Manager
+*[Liam Albright](http://liamalbright.me) - Full Stack Developer & Designer
+*[Divit Jawa](https://www.linkedin.com/in/divit-jawa/) - Front-end Application Developer
+*[Aditi Nettar](https://www.linkedin.com/in/aditi-nettar-449419133/) - UX Researcher
 
 ## Alumni
 We are trying to do build a system to better to acknowledge the contributions of very talented people who made valuable contributions in order to keep this tree alive. Once we have our platform ready, then it would be easy to keep track of contributions and provide acknowledgements.
 
-Prasad Thakur
-Ankit Rawat
-Priyanka Saraf
-
-http://github.com - automatic!
-[GitHub](http://github.com)
+*[Prasad Thakur](https://www.linkedin.com/in/prsdt/)
+*[Ankit Rawat](https://www.linkedin.com/in/ankr/)
+*[Priyanka Saraf](https://www.linkedin.com/in/priyankasaraf30/)
