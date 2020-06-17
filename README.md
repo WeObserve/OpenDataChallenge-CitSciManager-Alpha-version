@@ -23,7 +23,7 @@ The current team for summer sprint includes
 * [Aditi Nettar](https://www.linkedin.com/in/aditi-nettar-449419133/) - UX Researcher
 
 ## Alumni
-We are trying to do build a system to better to acknowledge the contributions of very talented people who made valuable contributions in order to keep this tree alive. Once we have our platform ready, then it would be easy to keep track of contributions and provide acknowledgements.
+We are trying to do build a system to better acknowledge the contributions of very talented people who made valuable contributions in order to keep this tree alive. Once we have our platform ready, then it would be easy to keep track of contributions and provide acknowledgements.
 
 * [Prasad Thakur](https://www.linkedin.com/in/prsdt/)
 * [Ankit Rawat](https://www.linkedin.com/in/ankr/)
