@@ -16,7 +16,6 @@ The current team for summer sprint includes
 * [Turam Purty](http://turam.github.io/) - Lead Researcher
 * [Vighesh Misal](https://www.linkedin.com/in/vighnesh-misal/) - Application Developer
 * [Kiranmayi Konda Lakshmi Chandra](https://www.linkedin.com/in/kiranmayiklc/) - AI/ML Developer
-* [Ashwin Srinivas](https://www.linkedin.com/in/ashwinsrinivas/)  - Application Developer
 * [Ashish Anand](https://www.linkedin.com/in/ashishanand9/) - Product & Sustainability Manager
 * [Liam Albright](http://liamalbright.me) - Full Stack Developer & Designer
 * [Divit Jawa](https://www.linkedin.com/in/divit-jawa/) - Front-end Application Developer
