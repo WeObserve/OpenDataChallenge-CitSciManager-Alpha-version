@@ -28,3 +28,5 @@ We are trying to do build a system to better acknowledge the contributions of ve
 * [Prasad Thakur](https://www.linkedin.com/in/prsdt/)
 * [Ankit Rawat](https://www.linkedin.com/in/ankr/)
 * [Priyanka Saraf](https://www.linkedin.com/in/priyankasaraf30/)
+* [Vishwa Pardeshi](https://www.linkedin.com/in/vishwapardeshi/)
+* [Sahana Bhat](https://www.linkedin.com/in/sahanavbhat/)
