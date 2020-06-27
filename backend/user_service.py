@@ -1,11 +1,13 @@
 import uuid
-import json
+import traceback
 from aws_config import aws_config
 import boto3
 import pandas
 import os
+from db.mongo.daos import users_dao, projects_dao
+import datetime
 
-def process_invite_users(request, user):
+def process_invite_users(db_connection, request, user, env):
     process_response = {
         "status": "SUCCESS",
         "is_success": True,
@@ -25,20 +27,20 @@ def process_invite_users(request, user):
                         aws_secret_access_key=aws_config["secret_access_key"],
                         region_name="us-west-2"
                     )
-        # load users_table
-        users = json.load(
-            open("./db/users_table.json", "r"))
+
+        users = users_dao.get_users_by_project_id(db_connection, user["project_id"])
+        project = projects_dao.get_project_by_id(db_connection, user["project_id"])
 
         user_sending_invitation = user
+
         existing_user_emails_for_this_project = {
-            "sender": [],
-            "collector": []
+            "SENDER": [],
+            "COLLECTOR": []
         }
 
         # collect senders and collectors emails for this project
         for user in users:
-            if user["project_id"] == user_sending_invitation["project_id"]:
-                existing_user_emails_for_this_project[user["type"]].append(user["email"])
+            existing_user_emails_for_this_project[user["type"]].append(user["email"])
 
         user_emails_to_send_invitation_to = []
         users_to_be_created = []
@@ -69,7 +71,8 @@ def process_invite_users(request, user):
                         "email": user_email,
                         "type": user_type,
                         "project_id": user_sending_invitation["project_id"],
-                        "uuid": uuid.uuid1().hex
+                        "uuid": uuid.uuid1().hex,
+                        "created_at": datetime.datetime.utcnow()
                     }
 
                     users_to_be_created.append(user_to_be_created)
@@ -88,7 +91,7 @@ def process_invite_users(request, user):
                 "Body": {
                     "Text": {
                         "Charset": "UTF-8",
-                        "Data": "You were invited to THE_LINK_GOES_HERE by " + user_sending_invitation["email"] + " to contribute to project " + user_sending_invitation["project_id"]
+                        "Data": "You were invited to THE_LINK_GOES_HERE by " + user_sending_invitation["email"] + " to contribute to project " + project["name"]
                     }
                 },
                 "Subject": {
@@ -99,16 +102,12 @@ def process_invite_users(request, user):
             Source="anindyapandey@gmail.com"
         )
 
-        #add users to be created to the list of users
-        users = users + users_to_be_created
-
         #make entries for the users that were created in db
-        #must be replaced by a proper db
-        json.dump(users, open("./db/users_table.json", "w"))
+        users_dao.insert_users(db_connection, users_to_be_created)
 
         return process_response
     except Exception as e:
-        print(e)
+        print(traceback.format_exc())
         process_response["is_success"] = False
         process_response["status"] = "FAILED"
         process_response["message"] = str(e)

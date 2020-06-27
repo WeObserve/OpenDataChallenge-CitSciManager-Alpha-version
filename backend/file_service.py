@@ -3,8 +3,9 @@ from aws_config import aws_config
 import json
 import os
 import datetime
+from db.mongo.daos import files_dao
 
-def process_upload_file(request):
+def process_upload_file(db_connection, request, user, env):
     process_response = {
         "status": "SUCCESS",
         "is_success": True,
@@ -27,16 +28,8 @@ def process_upload_file(request):
                              aws_access_key_id=aws_config["access_key_id"],
                              aws_secret_access_key=aws_config["secret_access_key"],
                              )
-    # load users_table
-    users = json.load(
-        open("./db/users_table.json", "r"))
 
-    user_uploading_files = None
-
-    # look for the given uuid
-    for user in users:
-        if user["uuid"] == request.form["uuid"]:
-            user_uploading_files = user
+    user_uploading_files = user
 
     for file_key in request.files:
         try:
@@ -49,29 +42,25 @@ def process_upload_file(request):
             file.save(file.filename)
 
             #s3 upload the temporarily saved file to greendub-uploaded-files-mvp bucket
-            s3_response = s3_client.upload_file("./" + file.filename, aws_config["bucket_name"], filename)
+            s3_response = s3_client.upload_file("./" + file.filename, aws_config[env]["bucket_name"], filename)
 
-            #load files_table
-            files = json.load(open("./db/files_table.json", "r"))
-
-            files.append({
+            file_document_to_be_created = {
                 "original_filename": file.filename,
                 "s3_file_path": filename,
-                "user_uuid": request.form["uuid"],
+                "sender_id": user_uploading_files["_id"],
                 "license": request.form["license"],
-                "project": user_uploading_files["project_id"],
+                "project_id": user_uploading_files["project_id"],
+                "created_at": datetime.datetime.utcnow(),
                 "meta_data": {
-                    "file_created_at": datetime.datetime.fromtimestamp(
-                        float(int(request.form["time"])/1000)).strftime('%Y-%m-%d %H:%M:%S.%f'),
                     "location_name": request.form["location_name"],
                     "latitude": request.form["latitude"],
                     "longitude": request.form["longitude"]
                 }
-            })
+            }
 
             #make an entry for the file in db
-            #must be replaced by a proper db
-            json.dump(files, open("./db/files_table.json", "w"))
+            #optimise this and move upload as well as insert into a txn
+            print(files_dao.insert_file(db_connection, file_document_to_be_created))
 
             process_response["number_of_files_uploaded"] = process_response["number_of_files_uploaded"] + 1
             os.remove("./" + file.filename)
@@ -89,34 +78,25 @@ def process_upload_file(request):
 
     return process_response
 
-def process_download_file(request):
+def process_download_file(db_connection, request, user, env):
     process_response = {
         "status": "SUCCESS",
         "is_success": True,
         "files": []
     }
 
-    # load users_table
-    users = json.load(
-        open("./db/users_table.json", "r"))
+    user_downloading_files = user
 
-    user_downloading_files = None
-
-    # look for the given uuid
-    for user in users:
-        if user["uuid"] == request.form["uuid"]:
-            user_downloading_files = user
-
-    # load files_table
-    files = json.load(open("./db/files_table.json", "r"))
-
+    files_associated_with_project = files_dao.get_files_by_project_id(db_connection, user_downloading_files["project_id"])
     files_to_be_downloaded = []
 
     #filter files by project id
-    for file in files:
-        if file["project"] == user_downloading_files["project_id"]:
-            file["s3_link"] = "https://greendub-uploaded-files-mvp.s3-us-west-2.amazonaws.com/" + file["s3_file_path"]
-            files_to_be_downloaded.append(file)
+    for file in files_associated_with_project:
+        if file["project_id"] == user_downloading_files["project_id"]:
+            s3_link = "https://greendub-uploaded-files-mvp.s3-us-west-2.amazonaws.com/" + file["s3_file_path"]
+            files_to_be_downloaded.append({
+                "s3_link": s3_link,
+            })
 
     process_response["files"] = files_to_be_downloaded
 
