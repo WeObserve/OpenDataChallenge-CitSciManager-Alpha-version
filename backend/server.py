@@ -1,9 +1,9 @@
 import flask
 from flask import request
 import json
-from file_service import process_upload_file, process_download_file
-from user_service import process_invite_users
-from common_service import validate_request
+from services.file_service import process_upload_file, process_download_file
+from services.user_service import process_invite_users
+from services.common_service import validate_request
 from db.mongo import mongo_connection
 
 env = "staging"
