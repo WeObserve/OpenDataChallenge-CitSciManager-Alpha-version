@@ -42,7 +42,6 @@ def process_invite_users(db_connection, request, user, env):
         for user in users:
             existing_user_emails_for_this_project[user["type"]].append(user["email"])
 
-        user_emails_to_send_invitation_to = []
         users_to_be_created = []
 
         for file_key in request.files:
@@ -76,34 +75,37 @@ def process_invite_users(db_connection, request, user, env):
                     }
 
                     users_to_be_created.append(user_to_be_created)
-                    user_emails_to_send_invitation_to.append(user_to_be_created["email"])
 
                 os.remove("./" + file.filename)
             except Exception as e:
                 print(e)
 
-        # send email to users that are to be created using ses
-        ses_response = ses_client.send_email(
-            Destination={
-                "ToAddresses": user_emails_to_send_invitation_to
-            },
-            Message={
-                "Body": {
-                    "Text": {
+        #make documents for the users that were created in db
+        users_dao.insert_users(db_connection, users_to_be_created)
+
+        for user_created in users_to_be_created:
+            # send email to users that are to be created using ses
+            ses_response = ses_client.send_email(
+                Destination={
+                    "ToAddresses": [user_created["email"]]
+                },
+                Message={
+                    "Body": {
+                        "Text": {
+                            "Charset": "UTF-8",
+                            "Data": "You were invited to THE_LINK_GOES_HERE by " + user_sending_invitation[
+                                "email"] + " to contribute to project " + project["name"]
+                                    + ". Your uuid for the role of " + user_created["type"]
+                                    + " is " + user_created["uuid"]
+                        }
+                    },
+                    "Subject": {
                         "Charset": "UTF-8",
-                        "Data": "You were invited to THE_LINK_GOES_HERE by " + user_sending_invitation["email"] + " to contribute to project " + project["name"]
+                        "Data": "Invitation from Greendubs"
                     }
                 },
-                "Subject": {
-                    "Charset": "UTF-8",
-                    "Data": "Invitation from Greendubs"
-                }
-            },
-            Source="anindyapandey@gmail.com"
-        )
-
-        #make entries for the users that were created in db
-        users_dao.insert_users(db_connection, users_to_be_created)
+                Source="anindyapandey@gmail.com"
+            )
 
         return process_response
     except Exception as e:
