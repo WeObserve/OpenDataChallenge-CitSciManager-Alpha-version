@@ -6,3 +6,4 @@ aws_config.py
 backend/__pycache__/
 logs/
 db/
+backend/services/__pycache__
