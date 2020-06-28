@@ -5,5 +5,5 @@ backend/.idea/
 aws_config.py
 backend/__pycache__/
 logs/
-db/
+backend/db/__pycache__
 backend/services/__pycache__
