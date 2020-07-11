@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <title>Sarjom | CitSci Earth</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A directory of citizen science on Earth"
+    />
+    <meta name="author" content="'turam'" />
+
+    <!-- Le styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+    <style type="text/css">
+      body {
+        padding-top: 20px;
+        padding-bottom: 40px;
+      }
+
+      /* Custom container */
+      .container-narrow {
+        margin: 0 auto;
+        max-width: 700px;
+      }
+      .container-narrow > hr {
+        margin: 30px 0;
+      }
+
+      /* Main marketing message and sign up button */
+      .jumbotron {
+        margin: 60px 0;
+        text-align: center;
+      }
+      .jumbotron h1 {
+        font-size: 72px;
+        line-height: 1;
+      }
+      .jumbotron .btn {
+        font-size: 21px;
+        padding: 14px 24px;
+      }
+
+      /* Supporting marketing content */
+      .marketing {
+        margin: 60px 0;
+      }
+      .marketing p + h4 {
+        margin-top: 28px;
+      }
+
+      .d-flex {
+        display: -ms-flexbox !important;
+        display: flex !important;
+      }
+      .flex-fill {
+        flex: 1 1 auto !important;
+      }
+
+      .bd-highlight {
+        background-color: rgba(86, 61, 124, 0.15);
+        border: 1px solid rgba(86, 61, 124, 0.15);
+      }
+
+      label {
+        font-weight: bold;
+      }
+    </style>
+    <link rel="stylesheet" href="{{url_for('static', filename='css/bootstrap-responsive.css')}}" />
+    <link rel="sarjom icon" type="image/x-icon" href="../assets/sarjom.ico" />
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="../assets/js/html5shiv.js"></script>
+    <![endif]-->
+    {% if map %}
+      {{map.js}}
+    {% endif %}
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
+  </head>
+  <body data-gr-c-s-loaded="true">
+    <div class="container-narrow">
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li class="active">
+            <a href="index.html">Home</a>
+          </li>
+          <li>
+            <a href="about.html">About Us</a>
+          </li>
+          <li>
+            <a href="reviews.html">Our Reviews</a>
+          </li>
+          <li>
+            <a href="join-us.html">Join Us</a>
+          </li>
+        </ul>
+        <h3 class="muted">Sarjom | CitSci Earth</h3>
+      </div>
+      <hr />
+      <form>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a> >></li>
+            <li class="breadcrumb-item">
+              <a href="collect.html">Collect</a> >>
+            </li>
+            <li class="breadcrumb-item">
+              <a href="datastory.html">Create Datastory</a>
+            </li>
+          </ol>
+        </nav>
+        <hr />
+      </form>
+    <div class="container-narrow">
+        <h1>Data Story Options</h1>
+        <hr />
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="text-danger text-center">
+                    {% for message in messages %}
+                        <li style="list-style: none">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        <div class="row">
+            <div class="col-md-9">
+                <form action="{{url_for('create_datastories') }}" method="POST" role="form">
+                    {{form.hidden_tag()}}
+                    <div class="form-field">
+                        {{form.draft_form.project_details_form.project_id.label}}
+                        {{form.draft_form.project_details_form.project_id}}
+                        {% if form.draft_form.project_details_form.project_id.errors %}
+                            <ul class="errors">
+                                {% for error in form.draft_form.project_details_form.project_id.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    <br/>
+                    <div class="col-sm-6 my-2">
+                        <button type="submit" name="plot-dataset-on-map" class="btn btn-primary">Plot Dataset on map</button>
+                    </div>
+                    <br/>
+                    {% if map %}
+                        {{map.html}}
+                    {% endif %}
+                    <br />
+                    {% if form.draft_form.project_details_form.contributors %}
+                        <div class="form-field">
+                            {{form.draft_form.project_details_form.contributors.label}}
+                            {% for contributor in form.draft_form.project_details_form.contributors %}
+                                <ul>
+                                    <li>  {{contributor.data}} </li>
+                                </ul>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if form.draft_form.project_details_form.project_owner.data %}
+                        <div class="form-field">
+                            {{form.draft_form.project_details_form.project_owner.label}} {{form.draft_form.project_details_form.project_owner.data}}
+                        </div>
+                    {% endif %}
+                    {% if form.draft_form.project_details_form.organization.data %}
+                        <div class="form-field">
+                            {{form.draft_form.project_details_form.organization.label}} {{form.draft_form.project_details_form.organization.data}}
+                        </div>
+                    {% endif %}
+                    {% if map %}
+                        <div class="form-field">
+                            {{form.draft_form.editordata}}
+                                {% if form.draft_form.editordata.errors %}
+                                    <ul class="errors">
+                                        {% for error in form.draft_form.editordata.errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                        </div>
+                        <div class="col-xm-6 my-2">
+                            <button type="submit" name="save-draft-datastory" class="btn btn-primary">Save Draft</button>
+                            <button type="submit" name="discard-draft-datastory" class="btn btn-primary">Discard Draft</button>
+                        </div>
+                    {% endif %}
+                    <br />
+                    <hr />
+                    <div class="col-sm-6">
+                        {% if map %}
+                            <button type="submit" name="publish-datastory" class="btn btn-primary">Publish Datastory</button>
+                        {% else %}
+                            <button type="submit" name="publish-datastory" class="btn btn-primary" disabled>Publish Datastory</button>
+                        {% endif %}
+                    </div>
+                    <hr />
+                    {% if form.unique_url.data %}
+                        <p>Your datastory is published. Click below to view your datastory. You can also use url: http://127.0.0.1:5000/datastories/{{form.unique_url.data}}</p>
+                        <a href="{{url_for('view_datastory',url=form.unique_url.data)}}">{{form.unique_url.data}}</a>
+                    {% endif %}
+                    <br />
+                    <br />
+                    <p>
+                        Note: This module is currently under development. Publishing is disabled.
+                    </p>
+                </form>
+            </div>
+            <div class="col-md-3">
+                {% if form.draft_form.project_details_form.published_stories %}
+                    <h6>Published Datastories</h6>
+                    <ul>
+                        {% for story in form.draft_form.project_details_form.published_stories %}
+                                    <li><a href="{{url_for('view_datastory',url=story.data)}}">{{story.data}}</a></li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+        <hr />
+      <div class="footer">
+        <p>© GreenDubs, Information School, University of Washington, 2020</p>
+      </div>
+    </div>
+  </div>
+
+
+    <!-- /container -->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="../static/js/bootstrap-transition.js"></script>
+    <script src="../static/js/bootstrap-alert.js"></script>
+    <script src="../static/js/bootstrap-modal.js"></script>
+    <script src="../static/js/bootstrap-dropdown.js"></script>
+    <script src="../static/js/bootstrap-scrollspy.js"></script>
+    <script src="../static/js/bootstrap-tab.js"></script>
+    <script src="../static/js/bootstrap-tooltip.js"></script>
+    <script src="../static/js/bootstrap-popover.js"></script>
+    <script src="../static/js/bootstrap-button.js"></script>
+    <script src="../static/js/bootstrap-collapse.js"></script>
+    <script src="../static/js/bootstrap-carousel.js"></script>
+    <script src="../static/js/bootstrap-typeahead.js"></script>
+    <script>
+      $(document).ready(function() {
+        $('#summernote').summernote({
+          placeholder: 'Add story here..'
+        });
+      });
+    </script>
+  </body>
+</html>
