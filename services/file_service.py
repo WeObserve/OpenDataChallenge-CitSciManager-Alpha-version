@@ -1,5 +1,5 @@
 import boto3
-from aws_config import aws_config
+from aws_config import config
 import json
 import os
 import datetime
@@ -25,8 +25,8 @@ def process_upload_file(db_connection, request, user, env):
     process_response["reasons"] = []
 
     s3_client = boto3.client('s3',
-                             aws_access_key_id=aws_config["access_key_id"],
-                             aws_secret_access_key=aws_config["secret_access_key"],
+                             aws_access_key_id=config[env].access_key_id,
+                             aws_secret_access_key=config[env].secret_access_key
                              )
 
     user_uploading_files = user
@@ -42,7 +42,7 @@ def process_upload_file(db_connection, request, user, env):
             file.save(file.filename)
 
             #s3 upload the temporarily saved file to greendub-uploaded-files-mvp bucket
-            s3_response = s3_client.upload_file("./" + file.filename, aws_config[env]["bucket_name"], filename)
+            s3_response = s3_client.upload_file("./" + file.filename, config[env].bucket_name, filename)
 
             file_document_to_be_created = {
                 "original_filename": file.filename,
@@ -51,11 +51,8 @@ def process_upload_file(db_connection, request, user, env):
                 "license": request.form["license"],
                 "project_id": user_uploading_files["project_id"],
                 "created_at": datetime.datetime.utcnow(),
-                "meta_data": {
-                    "location_name": request.form["location_name"],
-                    "latitude": request.form["latitude"],
-                    "longitude": request.form["longitude"]
-                }
+                "location_name": request.form["location_name"],
+                "location": [request.form["latitude"],request.form["longitude"]]
             }
 
             #make an entry for the file in db

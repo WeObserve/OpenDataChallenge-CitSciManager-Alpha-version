@@ -2,4 +2,5 @@ venv/
 .idea/
 __pycache__/
 aws_config.py
+config.py
 logs/

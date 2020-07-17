@@ -1,6 +1,6 @@
 import uuid
 import traceback
-from aws_config import aws_config
+from aws_config import config
 import boto3
 import pandas
 import os
@@ -25,8 +25,8 @@ def process_invite_users(db_connection, request, user, env):
 
     try:
         ses_client = boto3.client('ses',
-                        aws_access_key_id=aws_config["access_key_id"],
-                        aws_secret_access_key=aws_config["secret_access_key"],
+                        aws_access_key_id=config[env].access_key_id,                  #["access_key_id"],
+                        aws_secret_access_key=config[env].secret_access_key,        #["secret_access_key"],
                         region_name="us-west-2"
                     )
 
@@ -71,10 +71,12 @@ def process_invite_users(db_connection, request, user, env):
                 print("Temporarily saved file on server")
 
                 #create a pandas data frame from the csv file
-                user_invitation_file_df = pandas.read_csv(open("./" + file.filename, "r"))
+                user_invitation_file_df = pandas.read_csv(open("./" + file.filename, "r", encoding='utf-8'))
 
                 print("Read file into df")
                 print(user_invitation_file_df)
+                print(user_invitation_file_df.columns)
+
 
                 for index, row in user_invitation_file_df.iterrows():
                     user_email = row["email"]

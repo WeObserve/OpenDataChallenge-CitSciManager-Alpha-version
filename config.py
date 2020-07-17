@@ -12,6 +12,9 @@ class DevConfig(Config):
     DB_NAME = "greendubs"
     GOOGLEMAPS_KEY = os.environ.get('GOOGLEMAPS_KEY')
 
+class StagingConfig(Config):
+    DEBUG = False
+
 
 class ProdConfig(Config):
     DEBUG = False
@@ -20,5 +23,6 @@ class ProdConfig(Config):
 config = {
     "dev": DevConfig,
     "prod": ProdConfig,
+    "staging":StagingConfig,
     "default": DevConfig
 }

@@ -13,7 +13,7 @@ def validate_request(db_connection, request, request_type, request_body_type):
         # check if uuid is present in request body
         if "uuid" not in request.form:
             request_validity["is_valid"] = False
-            request_validity["reason"] = "UUID is amandatory"
+            request_validity["reason"] = "UUID is mandatory"
             return request_validity
 
         # get uuid from the request body
