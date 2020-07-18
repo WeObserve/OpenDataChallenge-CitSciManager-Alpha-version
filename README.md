@@ -30,4 +30,4 @@ We are trying to do build a system to better acknowledge the contributions of ve
 * [Priyanka Saraf](https://www.linkedin.com/in/priyankasaraf30/)
 * [Vishwa Pardeshi](https://www.linkedin.com/in/vishwapardeshi/)
 * [Sahana Bhat](https://www.linkedin.com/in/sahanavbhat/)
-* [Liam Albright](http://liamalbright.me) - Full Stack Developer & Designer
+* [Liam Albright](http://liamalbright.me)
