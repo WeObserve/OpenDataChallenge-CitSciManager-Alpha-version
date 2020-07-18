@@ -20,6 +20,7 @@ The current team for summer 2020 sprint includes
 * [Divit Jawa](https://www.linkedin.com/in/divit-jawa/) - Front-end Application Developer
 * [Aditi Nettar](https://www.linkedin.com/in/aditi-nettar-449419133/) - UX Researcher
 * [Divya Suresh Kumar](https://www.linkedin.com/in/divya-suresh-kumar-65b18a55/) - Program Manager
+* [El-Hadj Chikhaoui] (https://www.linkedin.com/in/elhadj-chikhaoui/) - Technical Program Manager
 * [Shreyas Shamasundar](https://www.linkedin.com/in/shreyasgs/) - Data Scientist
 
 ## Alumni
