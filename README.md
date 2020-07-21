@@ -1,6 +1,6 @@
 # Sarjom
 
-Name : Sarjom is the name given to the tree [Shorea robusta](https://en.wikipedia.org/wiki/Shorea_robusta) in the "ho" language. Sarjom represents the guiding philosophy of our software development lifecycle. We want to grow slow like a tree while ensuring the growth and development of all other species, flora and fauna that encompasses our environment.
+Name : Sarjom is the name given to the tree [Shorea robusta](https://en.wikipedia.org/wiki/Shorea_robusta) in the "ho" language. Sarjom represents the guiding philosophy of our software development lifecycle. We want to grow slow like a tree while ensuring the growth and development of all other species, flora and fauna that make up our environment.
 
 ## June 2020 - September 2020
 Development is spread across individual branches/contributors. We merge changes every fortnight and release a stable build every every month.
