@@ -14,7 +14,7 @@ class DevConfig(Config):
 
 class StagingConfig(Config):
     DEBUG = False
-
+    master_secret_key = "03b835b2-b41c-4d83-91d1-7ddb35836a61"
 
 class ProdConfig(Config):
     DEBUG = False

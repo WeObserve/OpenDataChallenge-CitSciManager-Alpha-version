@@ -11,14 +11,29 @@ from services.user_service import process_invite_users
 from services.common_service import validate_request
 from services.email_service import EmailService
 from db.mongo import mongo_connection
+from controllers import user_controller, login_controller, project_controller, file_controller
+from aws_config import config as aws_config
 
 env = "staging"
 mongo_db_connection = mongo_connection.connect_to_db(env)
 
 app = Flask(__name__)
 app.config.from_object(config[env])
+app.config["db_connection"] = mongo_db_connection[aws_config[env].mongo_database]
+app.config["db_connection_client"] = mongo_db_connection
+app.config["env"] = env
+app.config["in_memory_cache"] = {
+    "user_id_to_token_id_map": {},
+    "token_id_to_secret_key_map": {}
+} #need to replace with redis asap
+app.config["master_secret_key"] = config[env].master_secret_key
+
 GoogleMaps(app)
 
+app.register_blueprint(user_controller.construct_blueprint(app.config), url_prefix="/v2/users")
+app.register_blueprint(login_controller.construct_blueprint(app.config), url_prefix="/v2/login")
+app.register_blueprint(project_controller.construct_blueprint(app.config), url_prefix="/v2/projects")
+app.register_blueprint(file_controller.construct_blueprint(app.config), url_prefix="/v2/files")
 
 def define_map(datastory_details):
     print(f'{datastory_details.get("files")} in define map')

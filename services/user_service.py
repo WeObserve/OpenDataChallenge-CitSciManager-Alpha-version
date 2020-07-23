@@ -6,6 +6,8 @@ import pandas
 import os
 from db.mongo.daos import users_dao, projects_dao
 import datetime
+import hashlib
+from entities.user_entity import User
 
 def process_invite_users(db_connection, request, user, env):
     print("Inside process_invite_users")
@@ -135,3 +137,30 @@ def process_invite_users(db_connection, request, user, env):
         process_response["status"] = "FAILED"
         process_response["message"] = str(e)
         return process_response
+
+def create_user(db_connection, create_user_request_dto, env):
+    print("Inside create_user service")
+
+    users_with_given_email_as_cursor = users_dao.get_users(db_connection, {"email": create_user_request_dto.email})
+
+    if users_with_given_email_as_cursor is not None and users_with_given_email_as_cursor.count() != 0:
+        raise Exception("User with given email id already exists")
+
+    user_dict = populate_user_dict_from_create_user_request_dto(create_user_request_dto)
+    print(user_dict)
+
+    inserted_user_id = users_dao.insert_user(db_connection, user_dict).inserted_id
+
+    user_dict["_id"] = inserted_user_id
+
+    created_user = User(user_dict)
+
+    return created_user
+
+def populate_user_dict_from_create_user_request_dto(create_user_request_dto):
+    print("Inside populate_user_entity_from_create_user_request_dto")
+
+    return {
+        "email": create_user_request_dto.email,
+        "password": hashlib.sha256(create_user_request_dto.password.encode('utf-8')).hexdigest()
+    }
