@@ -29,10 +29,10 @@ def process_uploaded_files():
         print("There are some files still being processed hence skipping")
         return
 
-    uploaded_files_cursor = files_dao.get_files(mongo_db_connection, {"status": "UPLOADED"})
+    uploaded_files_cursor = files_dao.get_files(mongo_db_connection, {"file_type": "META_DATA", "status": "UPLOADED"})
 
     if uploaded_files_cursor is None or uploaded_files_cursor.count() == 0:
-        print("There are no new files uploaded hence skipping")
+        print("There are no new meta data files uploaded hence skipping")
         return
 
     uploaded_file_to_process = uploaded_files_cursor[0]
@@ -41,7 +41,7 @@ def process_uploaded_files():
 
     bucket_name = uploaded_file_to_process["s3_link"][8:].split('.')[0]
 
-    print('s3n://' + bucket_name + uploaded_file_to_process["relative_path"])
+    print('s3n://' + bucket_name + "/" + uploaded_file_to_process["relative_path"])
 
     df = spark.read.csv('s3n://' + bucket_name + "/" + uploaded_file_to_process["relative_path"], header=True).limit(1)
 

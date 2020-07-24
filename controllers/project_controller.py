@@ -1,5 +1,7 @@
 from flask import Blueprint, request
 from dtos.controllers.requests.create_project_request_dto import CreateProjectRequestDTO
+from dtos.controllers.responses.fetch_projects_response_dto import FetchProjectsResponseDTO
+from dtos.controllers.requests.fetch_projects_request_dto import FetchProjectsRequestDTO
 from services import project_service
 import json
 from dtos.controllers.responses.create_project_response_dto import CreateProjectResponseDTO
@@ -29,6 +31,25 @@ def construct_blueprint(app_config):
             return json.dumps(create_project_response_dto.convert_to_dict())
         except Exception as e:
             return json.dumps(CreateProjectResponseDTO({
+                "code": 500,
+                "message": str(e)
+            }).convert_to_dict())
+
+    @project_api.route('/fetch', methods=['POST'])
+    @authenticate
+    def fetch_projects(**kwargs):
+        print("Inside fetch_projects controller")
+
+        try:
+            # convert json request to python object
+            fetch_projects_request_dto = FetchProjectsRequestDTO(request)
+
+            fetch_projects_response_dto = project_service.fetch_projects(db_connection, kwargs["user_id"],
+                                                                         fetch_projects_request_dto, env)
+
+            return json.dumps(fetch_projects_response_dto.convert_to_dict())
+        except Exception as e:
+            return json.dumps(FetchProjectsResponseDTO({
                 "code": 500,
                 "message": str(e)
             }).convert_to_dict())

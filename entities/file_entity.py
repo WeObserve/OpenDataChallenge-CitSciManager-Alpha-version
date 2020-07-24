@@ -1,5 +1,5 @@
 class File():
-    FIELDS = ["_id", "file_name", "s3_link", "relative_path", "project_id", "creator_id", "status", "headers"]
+    FIELDS = ["_id", "file_name", "s3_link", "relative_path", "project_id", "creator_id", "status", "headers", "file_type"]
 
     def __init__(self, file_dict):
         print(self.__class__.__name__ + ": Inside constructor")
@@ -16,6 +16,7 @@ class File():
         self.headers = None
         if "headers" in file_dict:
             self.headers = file_dict["headers"]
+        self.file_type = file_dict["file_type"]
 
     def convert_to_dict(self):
         print(self.__class__.__name__ + ": Inside convert_to_dict")
@@ -28,5 +29,6 @@ class File():
             "project_id": self.project_id,
             "creator_id": self.creator_id,
             "status": self.status,
-            "headers": self.headers
+            "headers": self.headers,
+            "file_type": self.file_type
         }
