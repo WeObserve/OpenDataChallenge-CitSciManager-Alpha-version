@@ -12,3 +12,6 @@ def insert_user(db_connection, user):
 
 def get_users(db_connection, user):
     return db_connection["users"].find(user)
+
+def insert_user_using_txn(db_connection, user_dict, session):
+    return db_connection["users"].insert_one(user_dict, session=session)

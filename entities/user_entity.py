@@ -14,7 +14,7 @@ class User():
         self.organisation_affiliation = user_dict["organisation_affiliation"]
 
     def convert_to_dict(self):
-        print(self.__class__.__name__ + ": Inside conert_to_dict")
+        print(self.__class__.__name__ + ": Inside convert_to_dict")
 
         return {
             "_id": self._id,
