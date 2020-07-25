@@ -27,6 +27,9 @@ app.config["in_memory_cache"] = {
     "token_id_to_secret_key_map": {}
 } #need to replace with redis asap
 app.config["master_secret_key"] = config[env].master_secret_key
+app.config["login_page_url"] = config[env].login_page_url
+app.config["email_sender_address"] = config[env].email_sender_address
+
 
 GoogleMaps(app)
 

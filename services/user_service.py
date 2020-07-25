@@ -8,6 +8,7 @@ from db.mongo.daos import users_dao, projects_dao
 import datetime
 import hashlib
 from entities.user_entity import User
+import jwt
 
 def process_invite_users(db_connection, request, user, env):
     print("Inside process_invite_users")
@@ -138,7 +139,38 @@ def process_invite_users(db_connection, request, user, env):
         process_response["message"] = str(e)
         return process_response
 
-def create_user(db_connection, create_user_request_dto, env):
+
+def send_invitation_email(created_user, env, login_page_url_with_creds, email_sender_address):
+    print("Inside send_invitation_email")
+
+    ses_client = boto3.client('ses',
+                              aws_access_key_id=config[env].access_key_id,  # ["access_key_id"],
+                              aws_secret_access_key=config[env].secret_access_key,  # ["secret_access_key"],
+                              region_name="us-west-2"
+                              )
+
+    print("Got ses client")
+
+    ses_response = ses_client.send_email(
+        Destination={
+            "ToAddresses": [created_user.email]
+        },
+        Message={
+            "Body": {
+                "Text": {
+                    "Charset": "UTF-8",
+                    "Data": "You are invited to " + login_page_url_with_creds
+                }
+            },
+            "Subject": {
+                "Charset": "UTF-8",
+                "Data": "Invitation from Greendubs"
+            }
+        },
+        Source=email_sender_address
+    )
+
+def create_user(db_connection, create_user_request_dto, env, master_secret_key, login_page_url, email_sender_address):
     print("Inside create_user service")
 
     users_with_given_email_as_cursor = users_dao.get_users(db_connection, {"email": create_user_request_dto.email})
@@ -146,7 +178,7 @@ def create_user(db_connection, create_user_request_dto, env):
     if users_with_given_email_as_cursor is not None and users_with_given_email_as_cursor.count() != 0:
         raise Exception("User with given email id already exists")
 
-    user_dict = populate_user_dict_from_create_user_request_dto(create_user_request_dto)
+    user_dict, encoded_creds = populate_user_dict_from_create_user_request_dto(create_user_request_dto, master_secret_key)
     print(user_dict)
 
     inserted_user_id = users_dao.insert_user(db_connection, user_dict).inserted_id
@@ -155,12 +187,23 @@ def create_user(db_connection, create_user_request_dto, env):
 
     created_user = User(user_dict)
 
+    send_invitation_email(created_user, env, login_page_url + encoded_creds, email_sender_address)
+
     return created_user
 
-def populate_user_dict_from_create_user_request_dto(create_user_request_dto):
-    print("Inside populate_user_entity_from_create_user_request_dto")
+def populate_user_dict_from_create_user_request_dto(create_user_request_dto, master_secret_key):
+    print("Inside populate_user_dict_from_create_user_request_dto")
+
+    auto_generated_user_password = uuid.uuid1().hex
+
+    encoded_creds = jwt.encode({"email": create_user_request_dto.email, "password": auto_generated_user_password}, master_secret_key, algorithm='HS256').decode('utf-8')
+
+    print("generated encoded_creds: " + encoded_creds)
 
     return {
         "email": create_user_request_dto.email,
-        "password": hashlib.sha256(create_user_request_dto.password.encode('utf-8')).hexdigest()
-    }
+        "password": hashlib.sha256(auto_generated_user_password.encode('utf-8')).hexdigest(),
+        "name": create_user_request_dto.name,
+        "organisation_name": create_user_request_dto.organisation_name,
+        "organisation_affiliation": create_user_request_dto.organisation_affiliation
+    }, encoded_creds
