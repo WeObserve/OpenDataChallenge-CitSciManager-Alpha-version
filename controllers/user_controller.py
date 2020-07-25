@@ -3,6 +3,10 @@ from dtos.controllers.requests.create_user_request_dto import CreateUserRequestD
 from services import user_service
 import json
 from dtos.controllers.responses.create_user_response_dto import CreateUserResponseDTO
+from functools import partial
+from filters.authentication_filter import pseudo_authenticate
+from dtos.controllers.requests.invite_user_request_dto import InviteUserRequestDTO
+from dtos.controllers.responses.invite_user_response_dto import InviteUserResponseDTO
 
 def construct_blueprint(app_config):
     user_api = Blueprint('user_api', __name__)
@@ -12,6 +16,9 @@ def construct_blueprint(app_config):
     master_secret_key = app_config["master_secret_key"]
     login_page_url = app_config["login_page_url"]
     email_sender_address = app_config["email_sender_address"]
+    db_connection_client = app_config["db_connection_client"]
+
+    authenticate = partial(pseudo_authenticate, app_config=app_config)
 
     @user_api.route('', methods = ['POST'])
     def create_user():
@@ -31,6 +38,25 @@ def construct_blueprint(app_config):
 
         except Exception as e:
             return json.dumps(CreateUserResponseDTO({
+                "code": 500,
+                "message": str(e)
+            }).convert_to_dict())
+
+    @user_api.route('/invite', methods = ['POST'])
+    @authenticate
+    def invite_user(**kwargs):
+        print("Inside invite_user controller")
+
+        try:
+            #Convert request into python object
+            invite_user_request_dto = InviteUserRequestDTO(request)
+
+            invite_user_response_dto = user_service.invite_user(db_connection, invite_user_request_dto, env, master_secret_key, login_page_url, email_sender_address, kwargs["user_id"], db_connection_client)
+
+            return json.dumps(invite_user_response_dto.convert_to_dict())
+
+        except Exception as e:
+            return json.dumps(InviteUserResponseDTO({
                 "code": 500,
                 "message": str(e)
             }).convert_to_dict())

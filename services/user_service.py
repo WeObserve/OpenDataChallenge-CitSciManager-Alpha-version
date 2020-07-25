@@ -4,11 +4,13 @@ from aws_config import config
 import boto3
 import pandas
 import os
-from db.mongo.daos import users_dao, projects_dao
+from db.mongo.daos import users_dao, projects_dao, user_project_mappings_dao
 import datetime
 import hashlib
 from entities.user_entity import User
 import jwt
+from bson import ObjectId
+from transactional_services import user_transactional_service
 
 def process_invite_users(db_connection, request, user, env):
     print("Inside process_invite_users")
@@ -207,3 +209,85 @@ def populate_user_dict_from_create_user_request_dto(create_user_request_dto, mas
         "organisation_name": create_user_request_dto.organisation_name,
         "organisation_affiliation": create_user_request_dto.organisation_affiliation
     }, encoded_creds
+
+
+def check_if_user_creation_is_required(db_connection, invite_user_request_dto):
+    print("Inside check_if_user_creation_is_required")
+
+    user_cursor = users_dao.get_users(db_connection, {"email": invite_user_request_dto.email})
+
+    if user_cursor is None or user_cursor.count() == 0:
+        return True, {}
+
+    return False, user_cursor[0]
+
+def validate_that_user_can_invite_others_for_this_project(db_connection, invite_user_request_dto, user_id):
+    print("Inside validate_that_user_can_invite_others_for_this_project")
+
+    user_project_mapping_cursor = user_project_mappings_dao.get_user_project_mapping(db_connection, {
+        "project_name": invite_user_request_dto.project_name,
+        "user_id": ObjectId(user_id),
+        "mapping_type": {
+            "$in": ["COLLECTOR", "CREATOR"]
+        }
+    })
+
+    if user_project_mapping_cursor is None or user_project_mapping_cursor.count() == 0:
+        raise Exception("User can't invite users for this project")
+
+    return user_project_mapping_cursor[0]["project_id"]
+
+def check_if_upm_creation_is_required(db_connection, invite_user_request_dto):
+    print("Inside check_if_upm_creation_is_required")
+
+    upm_cursor = user_project_mappings_dao.get_user_project_mapping(db_connection, {
+        "project_name": invite_user_request_dto.project_name,
+        "email": invite_user_request_dto.email
+    })
+
+    if upm_cursor is None or upm_cursor.count() == 0:
+        return True, False
+
+    if invite_user_request_dto.mapping_type == "COLLECTOR":
+        if upm_cursor[0]["mapping_type"] == "SENDER":
+            return False, True
+        elif upm_cursor[0]["mapping_type"] == "COLLECTOR":
+            raise Exception("This user for this project already exists in this role")
+        elif upm_cursor[0]["mapping_type"] == "CREATOR":
+            raise Exception("This user already has these permissions for this project")
+
+    if invite_user_request_dto.mapping_type == "SENDER":
+        if upm_cursor[0]["mapping_type"] == "SENDER":
+            raise Exception("This user for this project already exists in this role")
+        elif upm_cursor[0]["mapping_type"] == "COLLECTOR":
+            raise Exception("This user already has these permissions for this project")
+        elif upm_cursor[0]["mapping_type"] == "CREATOR":
+            raise Exception("This user already has these permissions for this project")
+
+    raise Exception("Something is wrong")
+
+def invite_user(db_connection, invite_user_request_dto, env, master_secret_key, login_page_url, email_sender_address, user_id, db_connection_client):
+    print("Inside invite_user service")
+
+    #validate that user can invite others for this project
+    project_id = validate_that_user_can_invite_others_for_this_project(db_connection, invite_user_request_dto, user_id)
+
+    is_user_creation_required = None
+    is_upm_creation_required = None
+    is_upm_update_required = None
+    invited_user = None
+
+    #check if user creation is required
+    is_user_creation_required, invited_user = check_if_user_creation_is_required(db_connection, invite_user_request_dto)
+
+    if is_user_creation_required:
+       is_upm_creation_required = True
+    else:
+        is_upm_creation_required, is_upm_update_required = check_if_upm_creation_is_required(db_connection, invite_user_request_dto)
+
+    invite_user_response_dto, encoded_creds = user_transactional_service.invite_user(db_connection, invite_user_request_dto, is_user_creation_required, is_upm_creation_required, is_upm_update_required, invited_user, db_connection_client, master_secret_key, project_id)
+
+    if encoded_creds is not None:
+        send_invitation_email(User(invite_user_response_dto.user), env, login_page_url + encoded_creds, email_sender_address)
+
+    return invite_user_response_dto
