@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, flash
-from config import config
+#from config import config
 from flask_googlemaps import GoogleMaps, Map
 from db.mongo.daos.datastories_dao import DataStoryModel
 from forms import PublishForm
@@ -12,14 +12,14 @@ from services.common_service import validate_request
 from services.email_service import EmailService
 from db.mongo import mongo_connection
 from controllers import user_controller, login_controller, project_controller, file_controller
-from aws_config import config as aws_config
+from aws_config import config
 
 env = "staging"
 mongo_db_connection = mongo_connection.connect_to_db(env)
 
 app = Flask(__name__)
 app.config.from_object(config[env])
-app.config["db_connection"] = mongo_db_connection[aws_config[env].mongo_database]
+app.config["db_connection"] = mongo_db_connection[config[env].mongo_database]
 app.config["db_connection_client"] = mongo_db_connection
 app.config["env"] = env
 app.config["in_memory_cache"] = {

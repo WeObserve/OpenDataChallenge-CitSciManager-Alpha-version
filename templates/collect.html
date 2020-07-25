@@ -1,220 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+{% extends 'layout.html' %}
 
-    <title>Sarjom | CitSci Earth</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="A directory of citizen science on Earth"
-    />
-    <meta name="author" content="'turam'" />
-
-    <!-- Le styles -->
-    <link href="../static/css/bootstrap.css" rel="stylesheet" />
-    <style type="text/css">
-      body {
-        padding-top: 20px;
-        padding-bottom: 40px;
-      }
-
-      /* Custom container */
-      .container-narrow {
-        margin: 0 auto;
-        max-width: 700px;
-      }
-      .container-narrow > hr {
-        margin: 30px 0;
-      }
-
-      /* Main marketing message and sign up button */
-      .jumbotron {
-        margin: 60px 0;
-        text-align: center;
-      }
-      .jumbotron h1 {
-        font-size: 72px;
-        line-height: 1;
-      }
-      .jumbotron .btn {
-        font-size: 21px;
-        padding: 14px 24px;
-      }
-
-      /* Supporting marketing content */
-      .marketing {
-        margin: 60px 0;
-      }
-      .marketing p + h4 {
-        margin-top: 28px;
-      }
-
-      .d-flex {
-        display: -ms-flexbox !important;
-        display: flex !important;
-      }
-      .flex-fill {
-        flex: 1 1 auto !important;
-      }
-
-      .bd-highlight {
-        background-color: rgba(86, 61, 124, 0.15);
-        border: 1px solid rgba(86, 61, 124, 0.15);
-      }
-    </style>
-    <link href="../static/css/bootstrap-responsive.css" rel="stylesheet" />
-    <link rel="sarjom icon" type="image/x-icon" href="../assets/sarjom.ico" />
-
-    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-      <script src="../assets/js/html5shiv.js"></script>
-    <![endif]-->
-  </head>
-
-  <body data-gr-c-s-loaded="true">
-    <div class="container-narrow">
-      <div class="masthead">
-        <ul class="nav nav-pills pull-right">
-          <li class="active">
-            <a href="index.html">Home</a>
-          </li>
-          <li>
-            <a href="about.html">About Us</a>
-          </li>
-          <li>
-            <a href="reviews.html">Our Reviews</a>
-          </li>
-          <li>
-            <a href="join-us.html">Join Us</a>
-          </li>
-        </ul>
-        <h3 class="muted">Sarjom | CitSci Earth</h3>
-      </div>
-      <hr />
-      <body>
-        <nav aria-label="breadcrumb">
+{% block content %}
+  <div class="container-narrow">
+    <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="index.html">Home</a> >></li>
             <li class="breadcrumb-item">
-              <a href="collect.html">Collect Data</a>
+              <a href="{{url_for('collect')}}">Collect Data</a>
             </li>
           </ol>
-        </nav>
-        <hr />
-        <form>
-          <h4>Authentication</h4>
-          <div class="form-group">
-            <label for="exampleInputEmail1"
-              >Enter your registered email address</label
-            >
-            <input
-              type="email"
-              class="form-control"
-              id="exampleInputEmail1"
-              aria-describedby="emailHelp"
-              placeholder="Enter email"
-            />
+    </nav>
+    <hr />
+    <div class="container-narrow">
+      <div class="row-fluid marketing">
+        <div class="span6">
+          <div>
+            <a class="btn btn-outline-dark btn-collect disabled" href="/profile">Organization Profile</a>
           </div>
-          <div class="form-group">
-            <label for="exampleInputPassword1"
-              >Citizen Science Invite Code</label
-            >
-            <input
-              type="password"
-              class="form-control"
-              id="exampleInputPassword1"
-              placeholder="Copy/Paste invite code"
-            />
+          <br/>
+          <br/>
+          <div>
+            <a class="btn btn-outline-dark btn-collect disabled" href="/profile">Add Projects</a>
           </div>
-          <div class="form-check">
-            <input
-              type="checkbox"
-              class="form-check-input"
-              id="exampleCheck2"
-            />
-            <label class="form-check-label" for="exampleCheck2"
-              >Save my information for future</label
-            >
+          <br/>
+          <br/>
+          <div>
+            <a class="btn btn-outline-dark btn-collect" href="{{url_for('invite_users')}}">Invite Users</a>
           </div>
-        </form>
-        <hr />
-        <h4>Invite Users</h4>
-        <p>
-          You should have received an orientation training before inviting users
-          to this platform. Please use the template and the instructions
-          provided to invite users. In case, you face any issues, feel free to
-          reach out to us greendubs2020@gmail.com
-        </p>
-        <form>
-          <div class="form-group">
-            <label for="exampleFormControlFile1"
-              >Click to upload invite template file</label
-            >
-            <input
-              type="file"
-              class="form-control-file"
-              id="exampleFormControlFile1"
-            />
-          </div>
-        </form>
-        <hr />
-        <h4>Download Datasets</h4>
-        <p>Note: Under Development</p>
-        <div class="form-check">
-          <input type="checkbox" class="form-check-input" id="exampleCheck3" />
-          <label class="form-check-label" for="exampleCheck3"
-            >I agree to
-            <a href="terms-conditions.html" target="_terms-conditions"></a>terms
-            and conditions</label
-          >
         </div>
-        <br />
-        <a href="download-success.html"
-          ><button type="submit" class="btn btn-primary">
-            Download Datasets
-          </button></a
-        >
-        <hr />
-        <h4>Create DataStory</h4>
-        <p>Note: Under Development</p>
-        <div class="form-check">
-          <input type="checkbox" class="form-check-input" id="exampleCheck1" />
-          <label class="form-check-label" for="exampleCheck1"
-            >I agree to
-            <a href="terms-conditions.html" target="_terms-conditions"></a>terms
-            and conditions</label
-          >
+        <div class="span6">
+          <div>
+            <a class="btn btn-outline-dark btn-collect" href="{{url_for('upload_files')}}">Upload/Host Data</a>
+          </div>
+          <br/>
+          <br/>
+          <div>
+            <a class="btn btn-outline-dark btn-collect" href="{{url_for('download_files')}}">Download datasets</a>
+          </div>
+          <br/>
+          <br/>
+          <div>
+            <a class="btn btn-outline-dark btn-collect" href="{{url_for('create_datastories')}}">Publish Datastory</a>
+          </div>
         </div>
-        <br />
-        <a href="{{url_for('create_datastories')}}"
-          ><button type="submit" class="btn btn-primary">
-            Create Datastory
-          </button></a
-        >
-        <hr />
-      </body>
-      <div class="footer">
-        <p>© GreenDubs, Information School, University of Washington, 2020</p>
       </div>
     </div>
-    <!-- /container -->
+  </div>
 
-    <!-- Le javascript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="../static/js/jquery.js"></script>
-    <script src="../static/js/bootstrap-transition.js"></script>
-    <script src="../static/js/bootstrap-alert.js"></script>
-    <script src="../static/js/bootstrap-modal.js"></script>
-    <script src="../static/js/bootstrap-dropdown.js"></script>
-    <script src="../static/js/bootstrap-scrollspy.js"></script>
-    <script src="../static/js/bootstrap-tab.js"></script>
-    <script src="../static/js/bootstrap-tooltip.js"></script>
-    <script src="../static/js/bootstrap-popover.js"></script>
-    <script src="../static/js/bootstrap-button.js"></script>
-    <script src="../static/js/bootstrap-collapse.js"></script>
-    <script src="../static/js/bootstrap-carousel.js"></script>
-    <script src="../static/js/bootstrap-typeahead.js"></script>
-  </body>
-</html>
+{% endblock content %}

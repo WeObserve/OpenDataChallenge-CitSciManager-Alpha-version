@@ -127,3 +127,10 @@ a.article-title:hover {
 #login-index {
   margin-inline-start: 2rem;
 }
+
+.btn-collect{
+  padding-left: 25px;
+  padding-right: 25px;
+  padding-top: 25px;
+  padding-bottom: 25px;
+}
