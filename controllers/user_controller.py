@@ -9,6 +9,9 @@ def construct_blueprint(app_config):
 
     db_connection = app_config["db_connection"]
     env = app_config["env"]
+    master_secret_key = app_config["master_secret_key"]
+    login_page_url = app_config["login_page_url"]
+    email_sender_address = app_config["email_sender_address"]
 
     @user_api.route('', methods = ['POST'])
     def create_user():
@@ -18,7 +21,7 @@ def construct_blueprint(app_config):
             #Convert request into python object
             create_user_request_dto = CreateUserRequestDTO(request)
 
-            user_created = user_service.create_user(db_connection, create_user_request_dto, env)
+            user_created = user_service.create_user(db_connection, create_user_request_dto, env, master_secret_key, login_page_url, email_sender_address)
 
             return json.dumps(CreateUserResponseDTO({
                 "code": 200,

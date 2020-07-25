@@ -36,7 +36,7 @@ def pseudo_authenticate(f, app_config):
             access_token_bytes = access_token.encode()
 
             try:
-                payload = jwt.decode(access_token_bytes, secret_key)
+                payload = jwt.decode(access_token_bytes, secret_key, verify=True)
 
                 kwargs["user_id"] = payload["_id"]
 

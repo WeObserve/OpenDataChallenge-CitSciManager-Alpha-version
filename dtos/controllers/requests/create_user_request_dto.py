@@ -1,7 +1,7 @@
 import os
 
 class CreateUserRequestDTO():
-    MANDATORY_FIELDS = ["email", "password"]
+    MANDATORY_FIELDS = ["email", "organisation_name", "organisation_affiliation", "name"]
 
     def __init__(self, request):
         print(self.__class__.__name__ + ": Inside create_user_request_dto constructor")
@@ -9,7 +9,9 @@ class CreateUserRequestDTO():
         json_request = self.validate_request(request)
 
         self.email = json_request["email"]
-        self.password = json_request["password"]
+        self.organisation_name = json_request["organisation_name"]
+        self.organisation_affiliation = json_request["organisation_affiliation"]
+        self.name = json_request["name"]
 
     def validate_request(self, request):
         print(self.__class__.__name__ + ": Inside validate_request")

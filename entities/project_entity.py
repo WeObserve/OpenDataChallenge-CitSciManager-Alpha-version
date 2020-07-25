@@ -7,6 +7,7 @@ class Project():
         self._id = None
         if "_id" in project_dict:
             self._id = str(project_dict["_id"])
+        self.user_project_mapping_type = None
         if "user_project_mapping_type" in project_dict:
             self.user_project_mapping_type = project_dict["user_project_mapping_type"]
         self.name = project_dict["name"]

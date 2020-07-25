@@ -5,7 +5,7 @@ import hashlib
 from entities.user_entity import User
 from dtos.controllers.responses.login_response_dto import LoginResponseDTO
 
-def validate_email_id_and_password_and_fetch_user(db_connection, login_request_dto):
+def validate_email_id_and_password_and_fetch_user(db_connection, login_request_dto, secret_key):
     print("Inside validate_email_id_and_password_and_fetch_user")
 
     users_with_given_email_as_cursor = users_dao.get_users(db_connection, {"email": login_request_dto.email})
@@ -14,7 +14,8 @@ def validate_email_id_and_password_and_fetch_user(db_connection, login_request_d
         raise Exception("User with given email id does not exist")
 
     for user in users_with_given_email_as_cursor:
-        if user["password"] == hashlib.sha256(login_request_dto.password.encode('utf-8')).hexdigest():
+        decoded_password = jwt.decode(login_request_dto.password.encode(), secret_key, verify=True)["password"]
+        if user["password"] == hashlib.sha256(decoded_password.encode('utf-8')).hexdigest():
             return User(user)
 
     raise Exception("Password is incorrect")
@@ -46,7 +47,7 @@ def login(db_connection, login_request_dto, in_memory_cache, secret_key, env):
     token_id_to_secret_key_map = in_memory_cache["token_id_to_secret_key_map"]
 
     #Validate email id and password and get user from db
-    user_entity = validate_email_id_and_password_and_fetch_user(db_connection, login_request_dto)
+    user_entity = validate_email_id_and_password_and_fetch_user(db_connection, login_request_dto, secret_key)
 
     if user_entity._id in user_id_to_token_id_map:
         token_id = user_id_to_token_id_map[user_entity._id]

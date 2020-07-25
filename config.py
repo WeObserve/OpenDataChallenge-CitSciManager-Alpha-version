@@ -15,6 +15,8 @@ class DevConfig(Config):
 class StagingConfig(Config):
     DEBUG = False
     master_secret_key = "03b835b2-b41c-4d83-91d1-7ddb35836a61"
+    login_page_url = "http://need_to_decide_and_update/"
+    email_sender_address = "anindyapandey@gmail.com"
 
 class ProdConfig(Config):
     DEBUG = False
