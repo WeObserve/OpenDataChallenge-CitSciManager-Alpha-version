@@ -1,9 +1,12 @@
 import boto3
 from aws_config import config
-import json
+from bson import ObjectId
+from dtos.controllers.responses.create_files_response_dto import CreateFilesResponseDTO
 import os
 import datetime
 from db.mongo.daos import files_dao
+from entities.file_entity import File
+from dtos.controllers.responses.fetch_files_response_dto import FetchFilesResponseDTO
 
 def process_upload_file(db_connection, request, user, env):
     process_response = {
@@ -98,3 +101,75 @@ def process_download_file(db_connection, request, user, env):
     process_response["files"] = files_to_be_downloaded
 
     return process_response
+
+
+def create_files(db_connection, user_id, create_files_request_dto, env):
+    print("Inside create_files service")
+
+    project_id = ObjectId(create_files_request_dto.project_id)
+    user_id = ObjectId(user_id)
+    file_dicts = []
+
+    for create_file_request_dto in create_files_request_dto.files:
+        file_dicts.append({
+            "file_name": create_file_request_dto.file_name,
+            "s3_link": create_file_request_dto.s3_link,
+            "relative_path": create_file_request_dto.relative_s3_path,
+            "project_id": project_id,
+            "creator_id": user_id,
+            "status": "UPLOADED",
+            "file_type": create_file_request_dto.file_type
+        })
+
+    files_dao.insert_files(db_connection, file_dicts)
+
+    file_entities = []
+
+    for file_dict in file_dicts:
+        file_entities.append(File(file_dict))
+
+    return CreateFilesResponseDTO({
+        "code": 200,
+        "message": "SUCCESS",
+        "files": file_entities
+    })
+
+
+def fetch_files(db_connection, user_id, fetch_files_request_dto, env):
+    print("Inside fetch_files service")
+
+    file_query_dict = {
+        "project_id": ObjectId(fetch_files_request_dto.project_id)
+    }
+
+    consider_file_type = False
+
+    for file_type in ["RAW", "META_DATA"]:
+        if file_type not in fetch_files_request_dto.file_types:
+            consider_file_type = True
+            break
+
+    if consider_file_type:
+        file_query_dict["file_type"] = {
+            "$in": fetch_files_request_dto.file_types
+        }
+
+    file_cursor = files_dao.get_files(db_connection, file_query_dict)
+
+    if file_cursor is None or file_cursor.count() == 0:
+        return FetchFilesResponseDTO({
+            "code": 200,
+            "message": "SUCCESS",
+            "files": []
+        })
+
+    file_entities = []
+
+    for file_dict in file_cursor:
+        file_entities.append(File(file_dict))
+
+    return FetchFilesResponseDTO({
+        "code": 200,
+        "message": "SUCCESS",
+        "files": file_entities
+    })
