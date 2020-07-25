@@ -48,6 +48,8 @@ def process_uploaded_files():
     files_dao.update_file(mongo_db_connection, {"_id": uploaded_file_to_process["_id"]},
                           {"$set": {"status": "PROCESSED", "headers": df.first().__fields__}})
 
+    print("uploaded file processing done")
+
 scheduler = BackgroundScheduler({'apscheduler.timezone': 'Asia/Calcutta'})
 
 job = scheduler.add_job(process_uploaded_files, 'interval', minutes = 1)
