@@ -27,13 +27,13 @@ class EmailService:
                             "Charset": "UTF-8",
                             "Data": "Thank you "+ details.get('name')+
                                 " for your contribution to the project " + datastory_details.get('name') +
-                                ". Click the link to view the published datastory. http://127.0.0.1:5000/datastories/"
+                                ". Click the link to view the published datastory. http://35.164.106.73:5000/datastories/"
                                 + datastory_details.get('unique_url')
                             }
                         },
                         "Subject": {
                             "Charset": "UTF-8",
-                            "Data": "Thank you from Greendubs" + datastory_details.get('name')
+                            "Data": "Thank you from Greendubs " + datastory_details.get('name')
                         }
                     },
                     Source="kiranmayi.klc@gmail.com"
