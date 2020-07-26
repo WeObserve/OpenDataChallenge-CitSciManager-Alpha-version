@@ -9,6 +9,7 @@ docutils==0.15.2
 Flask==1.1.1
 flask-googlemaps==0.4.0
 Flask-WTF==0.14.3
+fsspec==0.7.4
 gunicorn==20.0.4
 idna==2.8
 itsdangerous==1.1.0
@@ -25,6 +26,7 @@ pyspark==3.0.0
 python-dateutil==2.8.1
 pytz==2019.3
 requests==2.22.0
+s3fs==0.4.2
 s3transfer==0.3.3
 six==1.15.0
 tzlocal==2.1
