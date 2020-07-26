@@ -12,6 +12,7 @@ import boto3
 
 env = "staging"
 
+print("About to start")
 spark = SparkSession.builder \
             .appName("app_name") \
             .getOrCreate()
