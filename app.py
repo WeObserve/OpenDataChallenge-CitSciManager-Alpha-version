@@ -11,7 +11,7 @@ from services.user_service import process_invite_users
 from services.common_service import validate_request
 from services.email_service import EmailService
 from db.mongo import mongo_connection
-from controllers import user_controller, login_controller, project_controller, file_controller
+from controllers import user_controller, login_controller, project_controller, file_controller, join_controller
 from aws_config import config
 
 env = "staging"
@@ -37,6 +37,7 @@ app.register_blueprint(user_controller.construct_blueprint(app.config), url_pref
 app.register_blueprint(login_controller.construct_blueprint(app.config), url_prefix="/v2/login")
 app.register_blueprint(project_controller.construct_blueprint(app.config), url_prefix="/v2/projects")
 app.register_blueprint(file_controller.construct_blueprint(app.config), url_prefix="/v2/files")
+app.register_blueprint(join_controller.construct_blueprint(app.config), url_prefix="/v2/joins")
 
 def define_map(datastory_details):
     print(f'{datastory_details.get("files")} in define map')
