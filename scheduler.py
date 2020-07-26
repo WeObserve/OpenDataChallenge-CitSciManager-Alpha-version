@@ -12,9 +12,12 @@ import boto3
 
 env = "staging"
 
-log_file = open("./slog.txt", "w+")
+def log_to_file(strng):
+    log_file = open("./slog.txt", "a")
+    log_file.write(strng)
+    log_file.close()
 
-log_file.write("About to start\n")
+log_to_file("About to start\n")
 
 spark = SparkSession.builder \
             .appName("app_name") \
@@ -28,7 +31,7 @@ spark._jsc.hadoopConfiguration().set("fs.s3n.endpoint", "us-west-2.amazonaws.com
 
 mongo_db_connection = mongo_connection.connect_to_db(env)[config[env].mongo_database]
 
-log_file.write("spark setup done\n")
+log_to_file("spark setup done\n")
 
 def send_join_done_email(created_user, env, s3_link, email_sender_address):
     print("Inside send_invitation_email")
@@ -61,7 +64,7 @@ def send_join_done_email(created_user, env, s3_link, email_sender_address):
     )
 
 def process_uploaded_files():
-    log_file.write("Inside process_uploaded_files")
+    log_to_file("Inside process_uploaded_files")
 
     processing_files_cursor = files_dao.get_files(mongo_db_connection, {"status": "PROCESSING"})
 
@@ -204,7 +207,7 @@ def process_uploaded_files():
         print("pending join processing done")
 
 if __name__ == '__main__':
-    log_file.write("\nI reached this")
+    log_to_file("\nI reached this")
 
     scheduler = BlockingScheduler({'apscheduler.timezone': 'Asia/Calcutta'})
 
@@ -219,4 +222,3 @@ if __name__ == '__main__':
             time.sleep(1)
     except(KeyboardInterrupt, SystemExit):
         scheduler.shutdown()
-        log_file.close()
