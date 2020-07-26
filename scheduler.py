@@ -34,7 +34,7 @@ mongo_db_connection = mongo_connection.connect_to_db(env)[config[env].mongo_data
 log_to_file("spark setup done\n")
 
 def send_join_done_email(created_user, env, s3_link, email_sender_address):
-    print("Inside send_invitation_email")
+    log_to_file("Inside send_invitation_email\n")
 
     ses_client = boto3.client('ses',
                               aws_access_key_id=config[env].access_key_id,  # ["access_key_id"],
@@ -42,7 +42,7 @@ def send_join_done_email(created_user, env, s3_link, email_sender_address):
                               region_name="us-west-2"
                               )
 
-    print("Got ses client")
+    log_to_file("Got ses client\n")
 
     ses_response = ses_client.send_email(
         Destination={
@@ -64,25 +64,25 @@ def send_join_done_email(created_user, env, s3_link, email_sender_address):
     )
 
 def process_uploaded_files():
-    log_to_file("Inside process_uploaded_files")
+    log_to_file("Inside process_uploaded_files\n")
 
     processing_files_cursor = files_dao.get_files(mongo_db_connection, {"status": "PROCESSING"})
 
     if processing_files_cursor is not None and processing_files_cursor.count() != 0:
-        print("There are some files still being processed hence skipping")
+        log_to_file("There are some files still being processed hence skipping\n")
         return
 
     processing_joins_cursor = joins_dao.get_joins(mongo_db_connection, {"status": "PROCESSING"})
 
     if processing_joins_cursor is not None and processing_joins_cursor.count() != 0:
-        print("There are some joins still being processed hence skipping")
+        log_to_file("There are some joins still being processed hence skipping\n")
         return
 
     uploaded_files_cursor = files_dao.get_files(mongo_db_connection, {"file_type": "META_DATA", "status": "UPLOADED"})
     pending_joins_cursor = joins_dao.get_joins(mongo_db_connection, {"status": "PENDING"})
 
     if (uploaded_files_cursor is None or uploaded_files_cursor.count() == 0) and (pending_joins_cursor is None or pending_joins_cursor.count() == 0):
-        print("There are no new meta data files uploaded and no pending joins hence skipping")
+        log_to_file("There are no new meta data files uploaded and no pending joins hence skipping\n")
         return
 
     if uploaded_files_cursor is not None and uploaded_files_cursor.count() != 0:
@@ -97,14 +97,14 @@ def process_uploaded_files():
         if uploaded_file_to_process["relative_path"][0] == "/":
             url = 's3n://' + bucket_name + uploaded_file_to_process["relative_path"]
 
-        print(url)
+        log_to_file(url + "\n")
 
         df = spark.read.csv(url, header=True).limit(1)
 
         files_dao.update_file(mongo_db_connection, {"_id": uploaded_file_to_process["_id"]},
                               {"$set": {"status": "PROCESSED", "headers": df.first().__fields__}})
 
-        print("uploaded file processing done")
+        log_to_file("uploaded file processing done\n")
     else:
         pending_join_to_process = pending_joins_cursor[0]
 
@@ -119,7 +119,7 @@ def process_uploaded_files():
         })
 
         if files_to_be_joined_cursor is None or files_to_be_joined_cursor.count() != 2:
-            print("No files found for joining hence skipping")
+            log_to_file("No files found for joining hence skipping\n")
             joins_dao.update_join(mongo_db_connection, {"_id": pending_join_to_process["_id"]},
                                   {"$set": {"status": "PROCESSED"}})
             return
@@ -146,8 +146,8 @@ def process_uploaded_files():
         if file2["relative_path"][0] == "/":
             url = 's3n://' + bucket_name_for_file_2 + file2["relative_path"]
 
-        print(url_for_file_1)
-        print(url_for_file_2)
+        log_to_file(url_for_file_1 + "\n")
+        log_to_file(url_for_file_2 + "\n")
 
         df1 = spark.read.csv(url_for_file_1, header=True)
         df2 = spark.read.csv(url_for_file_2, header=True)
@@ -174,7 +174,7 @@ def process_uploaded_files():
 
         df.show()
 
-        print("join done...trying to upload to s3")
+        log_to_file("join done...trying to upload to s3\n")
 
         pd_df = df.toPandas()
 
@@ -204,7 +204,7 @@ def process_uploaded_files():
 
         joins_dao.update_join(mongo_db_connection, {"_id": pending_join_to_process["_id"]}, {"$set": {"status": "PROCESSED"}})
 
-        print("pending join processing done")
+        log_to_file("pending join processing done\n")
 
 if __name__ == '__main__':
     log_to_file("\nI reached this")
