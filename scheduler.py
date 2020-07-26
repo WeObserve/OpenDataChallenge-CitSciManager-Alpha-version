@@ -1,4 +1,4 @@
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.background import BlockingScheduler
 import time
 from db.mongo import mongo_connection
 from db.mongo.daos import files_dao, joins_dao, users_dao
@@ -198,7 +198,7 @@ def process_uploaded_files():
 
         print("pending join processing done")
 
-scheduler = BackgroundScheduler({'apscheduler.timezone': 'Asia/Calcutta'})
+scheduler = BlockingScheduler({'apscheduler.timezone': 'Asia/Calcutta'})
 
 job = scheduler.add_job(process_uploaded_files, 'interval', minutes = 1, next_run_time=datetime.datetime.now())
 
