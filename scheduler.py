@@ -198,16 +198,17 @@ def process_uploaded_files():
 
         print("pending join processing done")
 
-scheduler = BlockingScheduler({'apscheduler.timezone': 'Asia/Calcutta'})
+if __name__ == '__main__':
+    scheduler = BlockingScheduler({'apscheduler.timezone': 'Asia/Calcutta'})
 
-job = scheduler.add_job(process_uploaded_files, 'interval', minutes = 1, next_run_time=datetime.datetime.now())
+    job = scheduler.add_job(process_uploaded_files, 'interval', minutes = 1, next_run_time=datetime.datetime.now())
 
-scheduler.start()
+    scheduler.start()
 
-scheduler.print_jobs()
+    scheduler.print_jobs()
 
-try:
-    while True:
-        time.sleep(1)
-except(KeyboardInterrupt, SystemExit):
-    scheduler.shutdown()
+    try:
+        while True:
+            time.sleep(1)
+    except(KeyboardInterrupt, SystemExit):
+        scheduler.shutdown()
