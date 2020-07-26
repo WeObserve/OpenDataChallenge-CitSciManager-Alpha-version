@@ -4,7 +4,6 @@ from db.mongo import mongo_connection
 from db.mongo.daos import files_dao, joins_dao, users_dao
 from entities.user_entity import User
 from aws_config import config
-from config import config as public_config
 from pyspark.sql import SparkSession
 import datetime
 import pandas
@@ -193,7 +192,7 @@ def process_uploaded_files():
 
         user = users_dao.get_users(mongo_db_connection, {"_id": pending_join_to_process["user_id"]})[0]
 
-        send_join_done_email(User(user), env, file_dict["s3_link"], public_config[env].email_sender_address)
+        send_join_done_email(User(user), env, file_dict["s3_link"], config[env].email_sender_address)
 
         joins_dao.update_join(mongo_db_connection, {"_id": pending_join_to_process["_id"]}, {"$set": {"status": "PROCESSED"}})
 
