@@ -24,6 +24,7 @@ spark._jsc.hadoopConfiguration().set("fs.s3n.endpoint", "us-west-2.amazonaws.com
 
 mongo_db_connection = mongo_connection.connect_to_db(env)[config[env].mongo_database]
 
+print("spark setup done")
 
 def send_join_done_email(created_user, env, s3_link, email_sender_address):
     print("Inside send_invitation_email")
@@ -199,6 +200,8 @@ def process_uploaded_files():
         print("pending join processing done")
 
 if __name__ == '__main__':
+    print("I reached this")
+
     scheduler = BlockingScheduler({'apscheduler.timezone': 'Asia/Calcutta'})
 
     job = scheduler.add_job(process_uploaded_files, 'interval', minutes = 1, next_run_time=datetime.datetime.now())
