@@ -30,17 +30,17 @@
         </div>
         <div class="span6">
           <div>
-            <a class="btn btn-outline-dark btn-collect" href="{{url_for('upload_files')}}">Upload/Host Data</a>
+            <a class="btn btn-outline-dark btn-collect" href="{{url_for('get_create_project')}}">Upload/Host Data</a>
           </div>
           <br/>
           <br/>
           <div>
-            <a class="btn btn-outline-dark btn-collect" href="{{url_for('download_files')}}">Download datasets</a>
+            <a class="btn btn-outline-dark btn-collect disabled" href="{{url_for('download_files')}}">Download datasets</a>
           </div>
           <br/>
           <br/>
           <div>
-            <a class="btn btn-outline-dark btn-collect" href="{{url_for('create_datastories')}}">Publish Datastory</a>
+            <a class="btn btn-outline-dark btn-collect disabled" href="{{url_for('create_datastories')}}">Publish Datastory</a>
           </div>
         </div>
       </div>

@@ -1,0 +1,77 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <div class="container-narrow">
+    <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a> >></li>
+            <li class="breadcrumb-item">
+              <a href="{{url_for('collect')}}">Collect Data</a>
+            </li>
+          </ol>
+    </nav>
+    <hr />
+    <div class="container-narrow">
+        <h3 class="text-center">Upload/Host Data</h3>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{url_for('get_create_project')}}">Create Project</a> </li>
+            <li class="breadcrumb-item"> -- </li>
+              <li class="breadcrumb-item"><a href="{{url_for('get_upload_raw_data_files')}}">Upload Raw Data</a></li>
+            <li class="breadcrumb-item"> -- </li>
+              <li class="breadcrumb-item"><a href="{{url_for('get_upload_metadata_files')}}">Upload Metadata</a></li>
+            <li class="breadcrumb-item"> -- </li>
+            <li class="breadcrumb-item">Map Metadata</li>
+          </ol>
+        </nav>
+        <br/>
+        <form action="{{url_for('post_upload_metadata_files') }}" method="POST" role="form" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Attach Metadata</h4>
+                    <div class="form-field">
+                        {{form.upload_metadata_form.file_type.label}}
+                        {{form.upload_metadata_form.file_type}}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <p>Select and upload all the metadata files you want to associate to your project. Currently, we
+                    support only CSV files (upto 2GB) with single row headers. File names must be unique and relevant and
+                        will be used to fetch headers for mapping.</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-field">
+                        {{form.upload_metadata_form.data_files}}
+                    </div>
+                    <div class="filenames"></div>
+                    <div class="filesize"></div>
+                    <div class="urls"></div>
+                    <div class="relative-paths"></div>
+                    {% for error in form.upload_metadata_form.data_files.errors %}
+                        <small class="text-danger">{{ error }}</small>
+                    {% endfor %}
+                </div>
+                <div class="col-md-6">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                </div>
+                <div class="col-md-2">
+                </div>
+                 <div class="col-md-2">
+                     <a class="btn btn-primary disabled" href="{{request.referrer}}">Back</a>
+                </div>
+                <div class="col-md-2">
+                     <button type="submit" name="upload-raw-data-files" class="btn btn-primary">Next</button>
+                </div>
+            </div>
+        </form>
+        <br/>
+    </div>
+  </div>
+
+{% endblock content %}

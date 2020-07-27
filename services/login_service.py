@@ -45,7 +45,8 @@ def login(db_connection, login_request_dto, in_memory_cache, secret_key, env):
 
     user_id_to_token_id_map = in_memory_cache["user_id_to_token_id_map"]
     token_id_to_secret_key_map = in_memory_cache["token_id_to_secret_key_map"]
-
+    print(f'user id token map: {user_id_to_token_id_map}')
+    print(f'token id to secret key map:{token_id_to_secret_key_map}')
     #Validate email id and password and get user from db
     user_entity = validate_email_id_and_password_and_fetch_user(db_connection, login_request_dto, secret_key)
 

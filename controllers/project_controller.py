@@ -35,6 +35,23 @@ def construct_blueprint(app_config):
                 "message": str(e)
             }).convert_to_dict())
 
+    @project_api.route('', methods=['GET'])
+    @authenticate
+    def get_create_project():
+        print("Inside get create_project controller")
+
+        try:
+            return {
+            "code": 200,
+            "message": "SUCCESS"
+           }
+        except Exception as e:
+            return{
+                "code": 500,
+                "message": str(e)
+            }
+
+
     @project_api.route('/fetch', methods=['POST'])
     @authenticate
     def fetch_projects(**kwargs):

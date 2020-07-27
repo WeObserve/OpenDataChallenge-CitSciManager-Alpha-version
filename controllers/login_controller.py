@@ -4,6 +4,7 @@ from services import login_service
 import json
 from dtos.controllers.responses.login_response_dto import LoginResponseDTO
 
+
 def construct_blueprint(app_config):
     login_api = Blueprint('login_api', __name__)
 

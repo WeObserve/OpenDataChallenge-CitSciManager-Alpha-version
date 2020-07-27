@@ -1,0 +1,104 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <div class="container-narrow">
+    <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a> >></li>
+            <li class="breadcrumb-item">
+              <a href="{{url_for('collect')}}">Collect Data</a>
+            </li>
+          </ol>
+    </nav>
+    <hr />
+    <div class="container-narrow">
+        <h3 class="text-center">Upload/Host Data</h3>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item highlight-link"><a href="{{url_for('get_create_project')}}">Create Project</a> </li>
+            <li class="breadcrumb-item"> -- </li>
+            <li class="breadcrumb-item">Upload Raw Data</li>
+            <li class="breadcrumb-item"> -- </li>
+            <li class="breadcrumb-item">Upload Metadata</li>
+            <li class="breadcrumb-item"> -- </li>
+            <li class="breadcrumb-item">Map Metadata</li>
+          </ol>
+        </nav>
+        <br/>
+        <form action="{{url_for('post_create_project') }}" method="POST" role="form">
+            {{ form.hidden_tag() }}
+            {{ form.create_project_form.hidden_tag() }}
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-field">
+                        {{form.create_project_form.project_name.label}}
+                        {{form.create_project_form.project_name}}
+                        {% for error in form.create_project_form.project_name.errors %}
+								<span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <p>Create a unique name for your project which will be listed under your organization.
+                        This name will be used to map all files associated with the project.</p>
+                </div>
+                <div class="col-md-2">
+                    <p></p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-field">
+                        <div class="disabled">
+                            <input type="checkbox" name="data-type" id="data-type-0" value="Raw Data Files" checked>
+                            <label for="data-type-0">Raw Data Files  </label>
+                        </div>
+                        <div class="disabled">
+                            <input type="checkbox" name="data-type" id="data-type-1" value="Metadata Files" checked>
+                            <label for="data-type-1">Metadata Files</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <p>We store your raw data files and all associated metadata mappings separately(but uniquely linked)
+                to optimize performance.</p>
+                </div>
+                 <div class="col-md-2">
+                    <p></p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    {{form.create_project_form.license.label}}
+                    {{form.create_project_form.license}}
+                    {% for error in form.create_project_form.license.errors %}
+								<span>{{ error }}</span>
+                        {% endfor %}
+                </div>
+                <div class="col-md-7">
+                    <p>Please select the appropriate license to your dataset as it will help you decide
+                how to share data on our platform.Licenses cannot be changed once created.</p>
+                </div>
+                 <div class="col-md-2">
+                    <p></p>
+                </div>
+            </div>
+             <div class="row">
+                <div class="col-md-3"></div>
+                <div class="col-md-7">
+                   {% for field, errors in form.errors.items() %}
+                        <div class="alert alert-error">
+                            {{ form[field].label }}: {{ ', '.join(errors) }}
+                        </div>
+                    {% endfor %}
+                </div>
+                 <div class="col-md-2">
+                     <button type="submit" name="upload-create-project" class="btn btn-primary">Next</button>
+                </div>
+            </div>
+        </form>
+        <br/>
+    </div>
+  </div>
+
+{% endblock content %}

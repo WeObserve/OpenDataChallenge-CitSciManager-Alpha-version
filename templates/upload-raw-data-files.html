@@ -1,0 +1,91 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <div class="container-narrow">
+    <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a> >></li>
+            <li class="breadcrumb-item">
+              <a href="{{url_for('collect')}}">Collect Data</a>
+            </li>
+          </ol>
+    </nav>
+    <hr />
+    <div class="container-narrow">
+        <h3 class="text-center">Upload/Host Data</h3>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{url_for('get_create_project')}}">Create Project</a> </li>
+            <li class="breadcrumb-item"> -- </li>
+              <li class="breadcrumb-item"><a href="{{url_for('get_upload_raw_data_files')}}">Upload Raw Data</a></li>
+            <li class="breadcrumb-item"> -- </li>
+            <li class="breadcrumb-item">Upload Metadata</li>
+            <li class="breadcrumb-item"> -- </li>
+            <li class="breadcrumb-item">Map Metadata</li>
+          </ol>
+        </nav>
+        <br/>
+        <form action="{{url_for('post_upload_raw_data_files') }}" method="POST" role="form" enctype="multipart/form-data">
+            {{form.hidden_tag()}}
+            {{ form.upload_raw_data_form.hidden_tag() }}
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Attach Data Files</h4>
+                    <div class="form-field">
+                        {{form.upload_raw_data_form.file_type.label}}
+                        {{form.upload_raw_data_form.file_type}}
+                    </div>
+                    <div class="disabled">
+                            <input type="checkbox" name="index-type" id="index-type-0" value="index-file-names" checked>
+                            <label for="index-type-0">Index File Names</label>
+                    </div>
+                    <div class="disabled">
+                            <input type="checkbox" name="index-type" id="index-type-1" value="index-embedded-file-locations" checked>
+                            <label for="index-type-1">Index Embedded File Locations</label>
+                    </div>
+                    <div class="disabled">
+                            <input type="checkbox" name="index-type" id="index-type-2" value="index-embedded-datetimestamp" checked>
+                            <label for="index-type-2">Index Embedded Date/TimeStamp</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <p>Select and upload all the raw data files (upto 2GB) in your project. You
+                    should have received instructions on file upload for your project. Currently we
+                    support image based data processing only.</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-field">
+                        {{form.upload_raw_data_form.data_files}}
+                    </div>
+                    <div class="filenames"></div>
+                    <div class="filesize"></div>
+                    <div class="urls"></div>
+                    <div class="relative-paths"></div>
+                    {% for error in form.upload_raw_data_form.data_files.errors %}
+                        <small class="text-danger">{{ error }}</small>
+                    {% endfor %}
+                </div>
+                <div class="col-md-6">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                </div>
+                <div class="col-md-2">
+                    <a class="btn btn-primary disabled" href="{{request.referrer}}">Back</a>
+                </div>
+                 <div class="col-md-2">
+                     <a class="btn btn-primary" href="{{url_for('get_upload_metadata_files')}}">Skip</a>
+                </div>
+                <div class="col-md-2">
+                     <button type="submit" name="upload-raw-data-files" class="btn btn-primary">Next</button>
+                </div>
+            </div>
+        </form>
+        <br/>
+    </div>
+  </div>
+
+{% endblock content %}

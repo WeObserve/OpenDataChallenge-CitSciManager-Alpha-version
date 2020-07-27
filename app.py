@@ -1,8 +1,7 @@
-from flask import Flask, render_template, request, flash
-#from config import config
+from flask import Flask, render_template, request, flash, url_for, redirect, session
 from flask_googlemaps import GoogleMaps, Map
 from db.mongo.daos.datastories_dao import DataStoryModel
-from forms import PublishForm
+from forms import PublishForm, LoginForm, DataProcessorForm
 import random
 from datetime import datetime
 import json
@@ -13,9 +12,15 @@ from services.email_service import EmailService
 from db.mongo import mongo_connection
 from controllers import user_controller, login_controller, project_controller, file_controller
 from aws_config import config
+from functools import partial
+from filters.authentication_filter import pseudo_authenticate
+import requests
+import boto3
+from botocore.config import Config
 
 env = "staging"
 mongo_db_connection = mongo_connection.connect_to_db(env)
+host = "http://127.0.0.1:5000"
 
 app = Flask(__name__)
 app.config.from_object(config[env])
@@ -25,11 +30,10 @@ app.config["env"] = env
 app.config["in_memory_cache"] = {
     "user_id_to_token_id_map": {},
     "token_id_to_secret_key_map": {}
-} #need to replace with redis asap
+}  # need to replace with redis asap
 app.config["master_secret_key"] = config[env].master_secret_key
 app.config["login_page_url"] = config[env].login_page_url
 app.config["email_sender_address"] = config[env].email_sender_address
-
 
 GoogleMaps(app)
 
@@ -38,21 +42,24 @@ app.register_blueprint(login_controller.construct_blueprint(app.config), url_pre
 app.register_blueprint(project_controller.construct_blueprint(app.config), url_prefix="/v2/projects")
 app.register_blueprint(file_controller.construct_blueprint(app.config), url_prefix="/v2/files")
 
+authenticate = partial(pseudo_authenticate, app_config=app.config)
+
+
 def define_map(datastory_details):
     print(f'{datastory_details.get("files")} in define map')
     loc_map = Map(identifier='locations-view',
-                      lat=datastory_details.get('files')[0].get('location')[1],
-                      lng=datastory_details.get('files')[0].get('location')[0],
-                      markers=[{'lat': file.get('location')[1],
-                                'lng': file.get('location')[0],
-                                'infobox': "Image: " + str(file.get('s3_file_path')) +
-                                           "\n Location: " + str(tuple(file.get('location'))) +
-                                           "\n Date: " + str(file.get('created_at')) +
-                                           "\n Contributor: " + str(datastory_details.get('senders')
-                                                                    .get(str(file.get('sender_id')))
-                                                                    .get('name'))}
-                               for file in datastory_details.get('files')],
-                      fit_markers_to_bounds=True)
+                  lat=datastory_details.get('files')[0].get('location')[1],
+                  lng=datastory_details.get('files')[0].get('location')[0],
+                  markers=[{'lat': file.get('location')[1],
+                            'lng': file.get('location')[0],
+                            'infobox': "Image: " + str(file.get('s3_file_path')) +
+                                       "\n Location: " + str(tuple(file.get('location'))) +
+                                       "\n Date: " + str(file.get('created_at')) +
+                                       "\n Contributor: " + str(datastory_details.get('senders')
+                                                                .get(str(file.get('sender_id')))
+                                                                .get('name'))}
+                           for file in datastory_details.get('files')],
+                  fit_markers_to_bounds=True)
     return loc_map
 
 
@@ -75,8 +82,8 @@ def generate_random_string():
     # is because we save drafts in the same collection and drafts zdo not have unique urls. If we have more than one
     # draft, unique index will raise on error.
     all_chars = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    unique_url = ''.join(random.choice(all_chars) for i in range(3))+'-'\
-                 + ''.join(random.choice(all_chars) for i in range(3))+'-'\
+    unique_url = ''.join(random.choice(all_chars) for i in range(3)) + '-' \
+                 + ''.join(random.choice(all_chars) for i in range(3)) + '-' \
                  + ''.join(random.choice(all_chars) for i in range(3))
     return unique_url
 
@@ -105,13 +112,13 @@ def create_datastories():
     published_stories = DataStoryModel(mongo_db_connection).get_published_datastories()
     for story in published_stories:
         form.draft_form.project_details_form.published_stories.append_entry(story)
-    #print(published_stories)
+    # print(published_stories)
     print('This is get datastories..')
     if request.method == "POST":
         project_id = form.draft_form.project_details_form.project_id.data
         print(project_id)
         datastory_details = DataStoryModel(mongo_db_connection).get_datastory_details(project_id)
-        #print(f'{datastory_details} before plot map')
+        # print(f'{datastory_details} before plot map')
 
         if not datastory_details.get('files'):
             flash('No files for the project yet. Cannot plot on the map.')
@@ -121,13 +128,13 @@ def create_datastories():
             print('Reached plot on map..')
             loc_map = define_map(datastory_details)
             set_project_details_form(form, datastory_details)
-            #print(form.draft_form.project_details_form.contributors)
-            #print(form.draft_form.editordata)
+            # print(form.draft_form.project_details_form.contributors)
+            # print(form.draft_form.editordata)
             return render_template('datastory.html', map=loc_map, form=form)
 
         elif "save-draft-datastory" in request.form:
             print('Reached save draft..')
-            #print(form.draft_form.editordata.data)
+            # print(form.draft_form.editordata.data)
             datastory_details['content'] = form.draft_form.editordata.data
             loc_map = define_map(datastory_details)
             set_project_details_form(form, datastory_details)
@@ -144,7 +151,7 @@ def create_datastories():
 
         elif "publish-datastory" in request.form:
             print('Reached publish..')
-            #print(datastory_details)
+            # print(datastory_details)
             # For now text editor data is stored as html string including images. We may need to extract attachments and
             # store them in another location to save size.
             datastory_details['content'] = form.draft_form.editordata.data
@@ -161,7 +168,7 @@ def create_datastories():
                 form.unique_url.data = unique_url
                 DataStoryModel(mongo_db_connection).publish_datastory(datastory_details)
                 # Call email service with senders and owner email address
-                EmailService().send_email_datastory(datastory_details,env)
+                EmailService().send_email_datastory(datastory_details, env)
                 return render_template('datastory.html', map=loc_map, form=form)
     return render_template('datastory.html', map=None, form=form)
 
@@ -171,7 +178,7 @@ def view_datastory(url):
     print(url)
     datastory_details = DataStoryModel(mongo_db_connection).view_datastory(url)
     loc_map = define_map(datastory_details)
-    return render_template('publish.html',map=loc_map, datastory=datastory_details)
+    return render_template('publish.html', map=loc_map, datastory=datastory_details)
 
 
 @app.route('/files', methods=["POST"])
@@ -199,6 +206,7 @@ def upload_files():
 
     return response
 
+
 @app.route('/files', methods=["GET"])
 def download_files():
     response = {
@@ -224,6 +232,7 @@ def download_files():
 
     return response
 
+
 @app.route('/users', methods=["POST"])
 def invite_users():
     response = {
@@ -248,6 +257,182 @@ def invite_users():
         response["error_response"] = process_response
 
     return response
+
+
+@app.route('/projects', methods=["GET"])
+def get_create_project():
+    # response = requests.get(host + url_for('project_api.get_create_project'),
+    #                        headers={'token_id': session.get('token_id'), 'access_token': session.get('access_token')})
+    #                        #if response.json().get('message') == "SUCCESS":
+    form = DataProcessorForm()
+    return render_template('create-project.html', form=form)
+    # login_form = LoginForm()
+    # return render_template('login.html', form=login_form)
+
+
+@app.route('/projects', methods=["POST"])
+def post_create_project():
+    form = DataProcessorForm()
+    if form.create_project_form.validate_on_submit():
+        project_name = form.create_project_form.project_name.data
+        project_license = form.create_project_form.license.data
+        response = requests.post(host + url_for('project_api.create_project'),
+                                 json={'name': project_name, 'license': project_license,
+                                       'user_id': session.get('user_id')},
+                                 headers={'token_id': session.get('token_id'),
+                                          'access_token': session.get('access_token')})
+        print(response.json())
+        if response.json().get('message') == "SUCCESS":
+            session['project_id'] = response.json().get('project').get('_id')
+            return render_template('upload-raw-data-files.html', form=form)
+        else:
+            flash(response.json().get('message'))
+    return render_template('create-project.html', form=form)
+
+
+@app.route('/upload-raw-files', methods=["GET"])
+def get_upload_raw_data_files():
+    form = DataProcessorForm()
+    return render_template('upload-raw-data-files.html', form=form)
+
+
+@app.route('/upload-meta-files', methods=["GET"])
+def get_upload_metadata_files():
+    form = DataProcessorForm()
+    return render_template('upload-metadata-files.html', form=form)
+
+
+@app.route('/map-meta-files', methods=["GET"])
+def get_map_metadata_files():
+    form = DataProcessorForm()
+    return render_template('map-metadata-files.html', form=form)
+
+
+@app.route('/sign_s3')
+def sign_s3():
+    s3_bucket = config[env].bucket_name
+    print(s3_bucket)
+    project_id = session.get('project_id')
+    file_name = project_id+'/'+request.args.get('file_name')
+    print(file_name)
+    file_type = request.args.get('file_type')
+   # print(project_id)
+    s3_client = boto3.client('s3', aws_access_key_id=config[env].access_key_id,
+                             aws_secret_access_key=config[env].secret_access_key,
+                             config=Config(signature_version='s3v4',region_name='us-west-2'))
+    try:
+        presigned_post = s3_client.generate_presigned_post(
+            s3_bucket,
+            file_name,
+            Fields={'acl': 'public-read','Content-Type': file_type},
+            Conditions=[{'acl': 'public-read'}, {'Content-Type': file_type}],
+            ExpiresIn=3000
+        )
+       # print(presigned_post)
+    except Exception as e:
+        flash(str(e))
+
+    #print(presigned_post)
+    return json.dumps({
+        'data':presigned_post,
+        'url':f'https://{s3_bucket}.s3.amazonaws.com/{file_name}'
+    })
+
+
+@app.route('/upload-raw-files', methods=["POST"])
+def post_upload_raw_data_files():
+    form = DataProcessorForm()
+    if form.upload_raw_data_form.validate_on_submit():
+        file_names = [file.filename for file in form.upload_raw_data_form.data_files.data]
+        print(file_names)
+        urls = request.form.getlist('s3url-hidden')
+        rpaths = request.form.getlist('s3rpath-hidden')
+        print(f'urls:{urls}')
+        print(f'rpath:{rpaths}')
+        project_files = [{"file_name": file_name, "s3_link": url, "relative_s3_path": rpath,"file_type": "RAW"}
+                         for (file_name, url, rpath) in zip(file_names,urls,rpaths)]
+        print(project_files)
+        response = requests.post(host + url_for('file_api.create_file'),
+                                 json={'project_id': session.get('project_id'), 'files': project_files,
+                                       'user_id': session.get('user_id')},
+                                 headers={'token_id': session.get('token_id'),
+                                          'access_token': session.get('access_token')})
+        print(response.json())
+        if response.json().get('message') == "SUCCESS":
+            return render_template('upload-metadata-files.html', form=form)
+        else:
+            flash(response.json().get('message'))
+    return render_template('upload-raw-data-files.html', form=form)
+
+
+@app.route('/upload-meta-files', methods=["POST"])
+def post_upload_metadata_files():
+    form = DataProcessorForm()
+    if form.upload_metadata_form.validate_on_submit():
+        file_names = [file.filename for file in form.upload_metadata_form.data_files.data]
+        print(file_names)
+        urls = request.form.getlist('s3url-hidden')
+        rpaths = request.form.getlist('s3rpath-hidden')
+        print(f'urls:{urls}')
+        print(f'rpath:{rpaths}')
+        project_files = [{"file_name": file_name, "s3_link": url, "relative_s3_path": rpath,"file_type": "META_DATA"}
+                         for (file_name, url, rpath) in zip(file_names,urls,rpaths)]
+        print(project_files)
+        response = requests.post(host + url_for('file_api.create_file'),
+                                 json={'project_id': session.get('project_id'), 'files': project_files,
+                                       'user_id': session.get('user_id')},
+                                 headers={'token_id': session.get('token_id'),
+                                          'access_token': session.get('access_token')})
+        print(response.json())
+        if response.json().get('message') == "SUCCESS":
+            return render_template('upload-metadata-files.html', form=form)
+        else:
+            flash(response.json().get('message'))
+    return render_template('map-metadata-files.html', form=form)
+
+
+@app.route('/map-meta-files', methods=["POST"])
+def post_map_metadata_files():
+    form = DataProcessorForm()
+    if form.upload_metadata_form.validate_on_submit():
+        file_names = [file.filename for file in form.upload_metadata_form.data_files.data]
+        print(file_names)
+        urls = request.form.getlist('s3url-hidden')
+        rpaths = request.form.getlist('s3rpath-hidden')
+        print(f'urls:{urls}')
+        print(f'rpath:{rpaths}')
+        project_files = [{"file_name": file_name, "s3_link": url, "relative_s3_path": rpath,"file_type": "META_DATA"}
+                         for (file_name, url, rpath) in zip(file_names,urls,rpaths)]
+        print(project_files)
+        response = requests.post(host + url_for('file_api.create_file'),
+                                 json={'project_id': session.get('project_id'), 'files': project_files,
+                                       'user_id': session.get('user_id')},
+                                 headers={'token_id': session.get('token_id'),
+                                          'access_token': session.get('access_token')})
+        print(response.json())
+        if response.json().get('message') == "SUCCESS":
+            return render_template('upload-metadata-files.html', form=form)
+        else:
+            flash(response.json().get('message'))
+    return render_template('map-metadata-files.html', form=form)
+
+
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        email = form.email.data
+        password = form.password.data
+        response = requests.post(host + url_for('login_api.login'),
+                                 json={'email': email, 'password': password})
+        print(f'In login: {response.json()}')
+        if response.json().get('message') == "SUCCESS":
+            session['user_id'] = response.json().get('user').get('_id')
+            session['token_id'] = response.json().get('token_id')
+            session['access_token'] = response.json().get('access_token')
+            return render_template('collect.html')
+    return render_template('login.html', form=form)
+
 
 if __name__ == '__main__':
     app.run(debug=False)
