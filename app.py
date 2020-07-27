@@ -10,13 +10,9 @@ from services.user_service import process_invite_users
 from services.common_service import validate_request
 from services.email_service import EmailService
 from db.mongo import mongo_connection
-from controllers import user_controller, login_controller, project_controller, file_controller
+from controllers import user_controller, login_controller, project_controller, file_controller, join_controller
 from aws_config import config
-from functools import partial
-from filters.authentication_filter import pseudo_authenticate
-import requests
-import boto3
-from botocore.config import Config
+
 
 env = "staging"
 mongo_db_connection = mongo_connection.connect_to_db(env)
@@ -41,8 +37,7 @@ app.register_blueprint(user_controller.construct_blueprint(app.config), url_pref
 app.register_blueprint(login_controller.construct_blueprint(app.config), url_prefix="/v2/login")
 app.register_blueprint(project_controller.construct_blueprint(app.config), url_prefix="/v2/projects")
 app.register_blueprint(file_controller.construct_blueprint(app.config), url_prefix="/v2/files")
-
-authenticate = partial(pseudo_authenticate, app_config=app.config)
+app.register_blueprint(join_controller.construct_blueprint(app.config), url_prefix="/v2/joins")
 
 
 def define_map(datastory_details):
@@ -435,4 +430,8 @@ def login():
 
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     app.run(debug=False)
+=======
+    app.run(host='0.0.0.0', debug=False)
+>>>>>>> 6816bc997514176ffcc2d5d6b92a5934adb87119
