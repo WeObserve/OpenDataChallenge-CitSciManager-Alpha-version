@@ -4,6 +4,7 @@ from entities.project_entity import Project
 from bson import ObjectId
 from dtos.controllers.responses.create_project_response_dto import CreateProjectResponseDTO
 
+
 def create_project(db_connection, user_id, create_project_request_dto, db_connection_client):
     project_entity = None
 

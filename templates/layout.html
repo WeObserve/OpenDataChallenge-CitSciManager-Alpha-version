@@ -7,9 +7,10 @@
 
 	    <!-- Bootstrap CSS -->
     	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-	    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
-		<link rel="stylesheet" href="{{url_for('static', filename='css/bootstrap-responsive.css')}}" />
+		<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
+		<link rel="stylesheet" href="{{url_for('static', filename='css/bootstrap-responsive.css')}}">
 		<link rel = "stylesheet"  href="{{url_for('static', filename='css/main.css')}}">
+		<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 		<title>CITSCI</title>
 	</head>
 	<body>
@@ -30,7 +31,13 @@
 		          <a class="nav-item nav-link" href="/about">About Us</a>
 		          <a class="nav-item nav-link" href="/login">Directory</a>
 		          <a class="nav-item nav-link" href="/register">Join Us</a>
-		          <a type="button" class="btn btn-outline-dark" id="login-index" href="{{url_for('login')}}">Login</a>
+					{% if session.get('logged_in') %}
+						<a type="button" class="btn btn-outline-dark" id="login-index"
+						   href="{{url_for('logout')}}">Logout</a>
+					{% else %}
+						<a type="button" class="btn btn-outline-dark" id="logout-index"
+						   href="{{url_for('login')}}">Login</a>
+					{% endif %}
 		        </div>
 		      </div>
 		    </div>

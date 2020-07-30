@@ -36,6 +36,13 @@ h1, h2, h3, h4, h5, h6 {
   color: #000000;
 }
 
+footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+}
+
 .content-section {
   background: #ffffff;
   padding: 10px 20px;
@@ -124,13 +131,10 @@ a.article-title:hover {
   margin-top: 28px;
 }
 
-#login-index {
+#login-index #logout-index {
   margin-inline-start: 2rem;
 }
 
 .btn-collect{
-  padding-left: 25px;
-  padding-right: 25px;
-  padding-top: 25px;
-  padding-bottom: 25px;
+  padding: 25px;
 }

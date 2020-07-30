@@ -4,6 +4,7 @@ from transactional_services import project_transactional_service
 from dtos.controllers.responses.fetch_projects_response_dto import FetchProjectsResponseDTO
 from entities.project_entity import Project
 
+
 def validate_that_project_name_created_by_this_user_does_not_exist(db_connection, user_id, create_project_request_dto):
     print("Inside validate_that_project_name_created_by_this_user_does_not_exist")
 
@@ -62,10 +63,11 @@ def fetch_project_id_to_user_project_mapping_type_map(db_connection, user_id, fe
 
     return project_id_to_user_project_mapping_type_map
 
+
 def fetch_projects(db_connection, user_id, fetch_projects_request_dto, env):
     print("Inside fetch_projects service")
 
-    #fetch project_id to user_project_mapping_type map
+    # fetch project_id to user_project_mapping_type map
     project_id_to_user_project_mapping_type_map = fetch_project_id_to_user_project_mapping_type_map(db_connection, user_id, fetch_projects_request_dto)\
 
     if not project_id_to_user_project_mapping_type_map:
@@ -75,7 +77,7 @@ def fetch_projects(db_connection, user_id, fetch_projects_request_dto, env):
             "projects": []
         })
 
-    #build list of ObjectId project_ids
+    # build list of ObjectId project_ids
     project_ids = []
 
     for project_id in project_id_to_user_project_mapping_type_map:

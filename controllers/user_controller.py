@@ -61,4 +61,15 @@ def construct_blueprint(app_config):
                 "message": str(e)
             }).convert_to_dict())
 
+    @user_api.route('/is-logged-in', methods=['POST'])
+    @authenticate
+    def check_user_logged_in(**kwargs):
+        print("Inside check user logged in")
+        print(f'user id is: {kwargs["user_id"]}')
+        return {
+            "code": 200,
+            "message": "SUCCESS"
+        }
+
     return user_api
+

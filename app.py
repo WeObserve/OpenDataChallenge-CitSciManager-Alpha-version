@@ -12,8 +12,6 @@ from services.email_service import EmailService
 from db.mongo import mongo_connection
 from controllers import user_controller, login_controller, project_controller, file_controller, join_controller
 from aws_config import config
-from functools import partial
-from filters.authentication_filter import pseudo_authenticate
 import requests
 import boto3
 from botocore.config import Config
@@ -45,8 +43,8 @@ app.register_blueprint(project_controller.construct_blueprint(app.config), url_p
 app.register_blueprint(file_controller.construct_blueprint(app.config), url_prefix="/v2/files")
 app.register_blueprint(join_controller.construct_blueprint(app.config), url_prefix="/v2/joins")
 
-authenticate = partial(pseudo_authenticate, app_config=app.config)
-
+############################################################################################################
+#### Other features yet to be integrated. ########################
 def define_map(datastory_details):
     print(f'{datastory_details.get("files")} in define map')
     loc_map = Map(identifier='locations-view',
@@ -88,16 +86,6 @@ def generate_random_string():
                  + ''.join(random.choice(all_chars) for i in range(3)) + '-' \
                  + ''.join(random.choice(all_chars) for i in range(3))
     return unique_url
-
-
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    return render_template('index.html')
-
-
-@app.route('/collect', methods=['GET', 'POST'])
-def collect():
-    return render_template('collect.html')
 
 
 # Current code makes many calls to database during create data stories and sets the form and map every time. As we use
@@ -260,16 +248,41 @@ def invite_users():
 
     return response
 
+###################################################################################################################
+
+
+@app.route('/', methods=['GET'])
+def index():
+    return render_template('index.html')
+
+
+@app.route('/collect', methods=['GET','POST'])
+def collect():
+    response = requests.post(host + url_for('user_api.check_user_logged_in'),
+                             json={'user_id': session.get('user_id')},
+                             headers={'token_id': session.get('token_id'),
+                                      'access_token': session.get('access_token')})
+    if response.json().get('message') == "SUCCESS":
+        return render_template('collect.html')
+    else:
+        return redirect(url_for('login'))
+
+
+@app.route('/data-licenses', methods=['GET'])
+def data_licenses():
+    return render_template('data-licenses.html')
+
 
 @app.route('/projects', methods=["GET"])
 def get_create_project():
-    # response = requests.get(host + url_for('project_api.get_create_project'),
-    #                        headers={'token_id': session.get('token_id'), 'access_token': session.get('access_token')})
-    #                        #if response.json().get('message') == "SUCCESS":
-    form = DataProcessorForm()
-    return render_template('create-project.html', form=form)
-    # login_form = LoginForm()
-    # return render_template('login.html', form=login_form)
+    response = requests.post(host + url_for('user_api.check_user_logged_in'),
+                             json={'user_id': session.get('user_id')},
+                             headers={'token_id': session.get('token_id'), 'access_token': session.get('access_token')})
+    if response.json().get('message') == "SUCCESS":
+        form = DataProcessorForm()
+        return render_template('create-project.html', form=form)
+    else:
+        return redirect(url_for('login'))
 
 
 @app.route('/projects', methods=["POST"])
@@ -294,20 +307,40 @@ def post_create_project():
 
 @app.route('/upload-raw-files', methods=["GET"])
 def get_upload_raw_data_files():
-    form = DataProcessorForm()
-    return render_template('upload-raw-data-files.html', form=form)
+    response = requests.post(host + url_for('user_api.check_user_logged_in'),
+                             json={'user_id': session.get('user_id')},
+                             headers={'token_id': session.get('token_id'),
+                                      'access_token': session.get('access_token')})
+    if response.json().get('message') == "SUCCESS":
+        form = DataProcessorForm()
+        return render_template('upload-raw-data-files.html', form=form)
+    else:
+        return redirect(url_for('login'))
 
 
 @app.route('/upload-meta-files', methods=["GET"])
 def get_upload_metadata_files():
-    form = DataProcessorForm()
-    return render_template('upload-metadata-files.html', form=form)
+    response = requests.post(host + url_for('user_api.check_user_logged_in'),
+                             json={'user_id': session.get('user_id')},
+                             headers={'token_id': session.get('token_id'), 'access_token': session.get('access_token')})
+    if response.json().get('message') == "SUCCESS":
+        form = DataProcessorForm()
+        return render_template('upload-metadata-files.html', form=form)
+    else:
+        return redirect(url_for('login'))
 
 
 @app.route('/map-meta-files', methods=["GET"])
 def get_map_metadata_files():
-    form = DataProcessorForm()
-    return render_template('map-metadata-files.html', form=form)
+    response = requests.post(host + url_for('user_api.check_user_logged_in'),
+                             json={'user_id': session.get('user_id')},
+                             headers={'token_id': session.get('token_id'),
+                                      'access_token': session.get('access_token')})
+    if response.json().get('message') == "SUCCESS":
+        form = DataProcessorForm()
+        return render_template('map-metadata-files.html', form=form)
+    else:
+        return redirect(url_for('login'))
 
 
 @app.route('/sign_s3')
@@ -345,7 +378,7 @@ def sign_s3():
 def post_upload_raw_data_files():
     form = DataProcessorForm()
     if form.upload_raw_data_form.validate_on_submit():
-        file_names = [file.filename for file in form.upload_raw_data_form.data_files.data]
+        file_names = [file.filename for file in form.upload_raw_data_form.raw_data_files.data]
         print(file_names)
         urls = request.form.getlist('s3url-hidden')
         rpaths = request.form.getlist('s3rpath-hidden')
@@ -371,7 +404,7 @@ def post_upload_raw_data_files():
 def post_upload_metadata_files():
     form = DataProcessorForm()
     if form.upload_metadata_form.validate_on_submit():
-        file_names = [file.filename for file in form.upload_metadata_form.data_files.data]
+        file_names = [file.filename for file in form.upload_metadata_form.meta_data_files.data]
         print(file_names)
         urls = request.form.getlist('s3url-hidden')
         rpaths = request.form.getlist('s3rpath-hidden')
@@ -387,10 +420,10 @@ def post_upload_metadata_files():
                                           'access_token': session.get('access_token')})
         print(response.json())
         if response.json().get('message') == "SUCCESS":
-            return render_template('upload-metadata-files.html', form=form)
+            return render_template('map-metadata-files.html', form=form)
         else:
             flash(response.json().get('message'))
-    return render_template('map-metadata-files.html', form=form)
+    return render_template('upload-metadata-files.html', form=form)
 
 
 @app.route('/map-meta-files', methods=["POST"])
@@ -413,7 +446,7 @@ def post_map_metadata_files():
                                           'access_token': session.get('access_token')})
         print(response.json())
         if response.json().get('message') == "SUCCESS":
-            return render_template('upload-metadata-files.html', form=form)
+            return render_template('upload-success.html', form=form)
         else:
             flash(response.json().get('message'))
     return render_template('map-metadata-files.html', form=form)
@@ -432,10 +465,19 @@ def login():
             session['user_id'] = response.json().get('user').get('_id')
             session['token_id'] = response.json().get('token_id')
             session['access_token'] = response.json().get('access_token')
-            return render_template('collect.html')
+            session['logged_in'] = True
+            return redirect(url_for('collect'))
     return render_template('login.html', form=form)
 
 
+@app.route('/logout', methods=["GET", "POST"])
+def logout():
+    print(f'In logout..')
+    session['logged_in'] = False
+    return redirect(url_for('index'))
+
+
+
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(host='0.0.0.0',debug=False)
 

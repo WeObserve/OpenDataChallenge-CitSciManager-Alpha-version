@@ -32,9 +32,8 @@ def create_new_token_id_secret_key_access_token(user_entity, user_id_to_token_id
     user_id_to_token_id_map[user_entity._id] = token_id
     token_id_to_secret_key_map[token_id] = secret_key
 
-    print(token_id)
-
-    print(access_token)
+    print(f'token id: {token_id}')
+    print(f'access_token: {access_token}')
     return {
         "token_id": token_id,
         "access_token": access_token

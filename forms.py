@@ -30,17 +30,13 @@ class CreateProjectForm(FlaskForm):
 
 
 class UploadDataFilesForm(FlaskForm):
-    file_type = SelectField(u'Select Type of Files', choices=[('images', 'Images')])
-    data_files = MultipleFileField(u'Data Files', id='raw_data_files', validators=[FileAllowed(['jpg', 'jpeg', 'png'],
-                                                                                               'Only Images are '
-                                                                                               'supported currently')])
+    raw_file_type = SelectField(u'Select Type of Files', choices=[('images', 'Images')])
+    raw_data_files = MultipleFileField(u'Data Files', id='raw_data_files')
 
 
 class UploadMetadataForm(FlaskForm):
-    file_type = SelectField(u'Select Type of Files', choices=[('csv', 'CSV')])
-    data_files = MultipleFileField(u'Data Files', id='metadata_files', validators=[FileAllowed(['csv'],
-                                                                                               'Only CSVs are supported'
-                                                                                               ' currently')])
+    meta_file_type = SelectField(u'Select Type of Files', choices=[('csv', 'CSV')])
+    meta_data_files = MultipleFileField(u'Data Files', id='metadata_files')
 
 
 class DataProcessorForm(FlaskForm):

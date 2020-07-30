@@ -31,8 +31,8 @@
                 <div class="col-md-6">
                     <h4>Attach Metadata</h4>
                     <div class="form-field">
-                        {{form.upload_metadata_form.file_type.label}}
-                        {{form.upload_metadata_form.file_type}}
+                        {{form.upload_metadata_form.meta_file_type.label}}
+                        {{form.upload_metadata_form.meta_file_type}}
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -44,18 +44,28 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-field">
-                        {{form.upload_metadata_form.data_files}}
+                        {{form.upload_metadata_form.meta_data_files}}
                     </div>
                     <div class="filenames"></div>
                     <div class="filesize"></div>
                     <div class="urls"></div>
                     <div class="relative-paths"></div>
-                    {% for error in form.upload_metadata_form.data_files.errors %}
+                    <span id="error"></span>
+                    {% for error in form.upload_metadata_form.meta_data_files.errors %}
                         <small class="text-danger">{{ error }}</small>
                     {% endfor %}
                 </div>
                 <div class="col-md-6">
                 </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><b>Alternative method: </b>For large files greater than total size of 2GB, contact us
+                    at greendubs2020@gmail.com. We will help you store and process your large files and provide
+                    an upload code to link to your data.</p>
+                </div>
+                <div class="col-md-6"></div>
             </div>
             <div class="row">
                 <div class="col-md-6">
@@ -66,7 +76,8 @@
                      <a class="btn btn-primary disabled" href="{{request.referrer}}">Back</a>
                 </div>
                 <div class="col-md-2">
-                     <button type="submit" name="upload-raw-data-files" class="btn btn-primary">Next</button>
+                     <button type="submit" name="upload-raw-data-files"
+                             class="btn btn-primary enable-on-validate" disabled>Next</button>
                 </div>
             </div>
         </form>
