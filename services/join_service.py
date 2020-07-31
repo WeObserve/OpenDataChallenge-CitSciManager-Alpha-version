@@ -75,20 +75,27 @@ def check_if_these_file_ids_exist_for_this_project(db_connection, create_joins_r
         "file_type": "META_DATA"
     })
 
+    file_dicts = []
     for doc in file_cursor:
+        file_dicts.append(doc)
         print(doc)
 
     if file_cursor is None or file_cursor.count() != len(file_object_ids):
         raise Exception("Some of these files are not PROCESSED or not a part of this project")
 
-    return file_cursor, file_id_to_selected_columns_map, join_dicts
+    return file_dicts, file_id_to_selected_columns_map, join_dicts
 
-def check_that_the_selected_columns_are_actually_present_in_the_files(db_connection, file_cursor,
+def check_that_the_selected_columns_are_actually_present_in_the_files(db_connection, file_dicts,
                                                                       file_id_to_selected_columns_map):
     print("Inside check_that_the_selected_columns_are_actually_present_in_the_files")
 
-    for file in file_cursor:
+    print("map")
+    print(file_id_to_selected_columns_map)
+
+    for file in file_dicts:
+        print(file)
         for column in file_id_to_selected_columns_map[str(file["_id"])]:
+            print(column)
             if column not in file["headers"]:
                 raise Exception("For some file the selected columns are not a part of the file headers")
 
@@ -99,10 +106,10 @@ def create_joins(db_connection, user_id, create_joins_request_dto, env):
     check_user_project_mapping(db_connection, user_id, create_joins_request_dto)
 
     #check if these file ids exist for this project_id
-    file_cursor, file_id_to_selected_columns_map, join_dicts = check_if_these_file_ids_exist_for_this_project(db_connection, create_joins_request_dto, user_id)
+    file_dicts, file_id_to_selected_columns_map, join_dicts = check_if_these_file_ids_exist_for_this_project(db_connection, create_joins_request_dto, user_id)
 
     #check that the selected columns are actually present in the files
-    check_that_the_selected_columns_are_actually_present_in_the_files(db_connection, file_cursor, file_id_to_selected_columns_map)
+    check_that_the_selected_columns_are_actually_present_in_the_files(db_connection, file_dicts, file_id_to_selected_columns_map)
 
     joins_dao.insert_joins(db_connection, join_dicts)
 
