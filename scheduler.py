@@ -84,6 +84,7 @@ def process_uploaded_files():
 
         if (uploaded_files_cursor is None or uploaded_files_cursor.count() == 0) and (pending_joins_cursor is None or pending_joins_cursor.count() == 0):
             log_to_file("There are no new meta data files uploaded and no pending joins hence skipping\n")
+
             return
 
         if uploaded_files_cursor is not None and uploaded_files_cursor.count() != 0:
@@ -106,6 +107,7 @@ def process_uploaded_files():
                                   {"$set": {"status": "PROCESSED", "headers": df.first().__fields__}})
 
             log_to_file("uploaded file processing done\n")
+
         else:
             pending_join_to_process = pending_joins_cursor[0]
 
@@ -121,6 +123,7 @@ def process_uploaded_files():
 
             if files_to_be_joined_cursor is None or files_to_be_joined_cursor.count() != 2:
                 log_to_file("No files found for joining hence skipping\n")
+
                 joins_dao.update_join(mongo_db_connection, {"_id": pending_join_to_process["_id"]},
                                       {"$set": {"status": "PROCESSED"}})
                 return
@@ -148,7 +151,9 @@ def process_uploaded_files():
                 url = 's3n://' + bucket_name_for_file_2 + file2["relative_path"]
 
             log_to_file(url_for_file_1 + "\n")
+
             log_to_file(url_for_file_2 + "\n")
+
 
             df1 = spark.read.csv(url_for_file_1, header=True)
             df2 = spark.read.csv(url_for_file_2, header=True)

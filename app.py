@@ -409,19 +409,31 @@ def post_upload_metadata_files():
         file_names = [file.filename for file in form.upload_metadata_form.meta_data_files.data]
         print(file_names)
         urls = request.form.getlist('s3url-hidden')
+        urls_dict = {url.split('/')[-1]:url for url in urls }
         rpaths = request.form.getlist('s3rpath-hidden')
+        rpaths_dict = {rpath.split('/')[-1]:rpath for rpath in rpaths}
         print(f'urls:{urls}')
-        print(f'rpath:{rpaths}')
-        project_files = [{"file_name": file_name, "s3_link": url, "relative_s3_path": rpath,"file_type": "META_DATA"}
-                         for (file_name, url, rpath) in zip(file_names,urls,rpaths)]
+        print(f'rpaths:{rpaths}')
+        print(urls_dict)
+        print(rpaths_dict)
+        project_files = [{"file_name": file_name, "s3_link": urls_dict[file_name],
+                          "relative_s3_path": rpaths_dict[file_name],"file_type": "META_DATA"}
+                         for file_name in file_names]
         print(project_files)
-        response = requests.post(host + url_for('file_api.create_file'),
-                                 json={'project_id': session.get('project_id'), 'files': project_files,
+        file_ids = []
+
+        for project_file in project_files:
+            response = requests.post(host + url_for('file_api.create_file'),
+                                 json={'project_id': session.get('project_id'), 'files': [project_file],
                                        'user_id': session.get('user_id')},
                                  headers={'token_id': session.get('token_id'),
                                           'access_token': session.get('access_token')})
-        print(response.json())
-        if response.json().get('message') == "SUCCESS":
+            print(response.json())
+            if response.json().get('message') == "SUCCESS":
+                file_ids.append(response.json().get('files')[0].get('_id'))
+            else:
+                flash(response.json().get('message'))
+        if len(file_ids) == len(project_files):
             files = request.files.getlist('upload_metadata_form-meta_data_files')
            # print(files)
             form = MapMetadataForm()
@@ -431,14 +443,13 @@ def post_upload_metadata_files():
                 #print(headers)
                 #print(file_names)
                 subform = MetadataFileForm()
-                subform.file_id.data = response.json().get('files')[i].get('_id')
+                subform.file_id.data = file_ids[i]
                 subform.file_name.data = file_names[i]
                 subform.file_columns = headers
                 #print(subform.file_name.data, subform.file_columns)
                 form.metadata_form_columns.append_entry(subform)
             return render_template('map-metadata-files.html', form=form)
-        else:
-            flash(response.json().get('message'))
+
     return render_template('upload-metadata-files.html', form=form)
 
 
@@ -450,7 +461,6 @@ def post_map_metadata_files():
     print(request.form.getlist('file_id'))
     print(request.form.getlist('column_select'))
     print(request.form.getlist('join_select'))
-    file_names = set(request.form.getlist('file_name'))
     select_columns = request.form.getlist('column_select')
     join_columns = request.form.getlist('join_select')
     selected_columns = {}
