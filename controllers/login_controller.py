@@ -15,7 +15,7 @@ def construct_blueprint(app_config):
 
     @login_api.route('', methods = ['POST'])
     def login():
-        print("Inside create_user controller")
+        print("Inside login controller")
 
         try:
             #Convert request into python object

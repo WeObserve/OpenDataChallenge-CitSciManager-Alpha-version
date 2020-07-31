@@ -10,7 +10,7 @@ from services.user_service import process_invite_users
 from services.common_service import validate_request
 from services.email_service import EmailService
 from db.mongo import mongo_connection
-from controllers import user_controller, login_controller, project_controller, file_controller, join_controller
+from controllers import user_controller, login_controller, project_controller, file_controller, join_controller, logout_controller
 from aws_config import config
 import requests
 import boto3
@@ -42,6 +42,7 @@ app.register_blueprint(login_controller.construct_blueprint(app.config), url_pre
 app.register_blueprint(project_controller.construct_blueprint(app.config), url_prefix="/v2/projects")
 app.register_blueprint(file_controller.construct_blueprint(app.config), url_prefix="/v2/files")
 app.register_blueprint(join_controller.construct_blueprint(app.config), url_prefix="/v2/joins")
+app.register_blueprint(logout_controller.construct_blueprint(app.config), url_prefix="/v2/logout")
 
 ############################################################################################################
 #### Other features yet to be integrated. ########################
@@ -514,5 +515,6 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',debug=False)
+    #Please run the server on 0.0.0.0 else it won't work on aws ec2
+    app.run(debug=False, host='0.0.0.0')
 
