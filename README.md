@@ -5,22 +5,6 @@ Name : Sarjom is the name given to the tree [Shorea robusta](https://en.wikipedi
 ## WeObserve Open Data Challenge Submission
 Development on this branch is frozen on July 31, 2020, 5PM CST, 8.30 PM IST, 8.00 AM PDT. 
 
-## Documentations for use
-
-How to run/use the application?
---
-
-AWS Resources Used
---
-
-AWS S3 Bucket Link(to fetch CSV datasets)
---
-
-Additonal Notes
---
-
-Video Demo URL
---
 
 ## Current Team
 The team for WeObserve ODC 20202 includes
