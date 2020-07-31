@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, flash, url_for, redirect, session
 from flask_googlemaps import GoogleMaps, Map
 from db.mongo.daos.datastories_dao import DataStoryModel
-from forms import PublishForm, LoginForm, DataProcessorForm
+from forms import PublishForm, LoginForm, DataProcessorForm, MapMetadataForm, MetadataFileForm
 import random
 from datetime import datetime
 import json
@@ -15,7 +15,7 @@ from aws_config import config
 import requests
 import boto3
 from botocore.config import Config
-
+import pandas as pd
 
 
 env = "staging"
@@ -403,6 +403,7 @@ def post_upload_raw_data_files():
 @app.route('/upload-meta-files', methods=["POST"])
 def post_upload_metadata_files():
     form = DataProcessorForm()
+    print('Reached post upload meta data..')
     if form.upload_metadata_form.validate_on_submit():
         file_names = [file.filename for file in form.upload_metadata_form.meta_data_files.data]
         print(file_names)
@@ -420,6 +421,20 @@ def post_upload_metadata_files():
                                           'access_token': session.get('access_token')})
         print(response.json())
         if response.json().get('message') == "SUCCESS":
+            files = request.files.getlist('upload_metadata_form-meta_data_files')
+           # print(files)
+            form = MapMetadataForm()
+            for i, file in enumerate(files):
+                file_read = pd.read_csv(file)
+                headers = list(file_read.columns)
+                #print(headers)
+                #print(file_names)
+                subform = MetadataFileForm()
+                subform.file_id.data = response.json().get('files')[i].get('_id')
+                subform.file_name.data = file_names[i]
+                subform.file_columns = headers
+                #print(subform.file_name.data, subform.file_columns)
+                form.metadata_form_columns.append_entry(subform)
             return render_template('map-metadata-files.html', form=form)
         else:
             flash(response.json().get('message'))
@@ -428,27 +443,48 @@ def post_upload_metadata_files():
 
 @app.route('/map-meta-files', methods=["POST"])
 def post_map_metadata_files():
-    form = DataProcessorForm()
-    if form.upload_metadata_form.validate_on_submit():
-        file_names = [file.filename for file in form.upload_metadata_form.data_files.data]
-        print(file_names)
-        urls = request.form.getlist('s3url-hidden')
-        rpaths = request.form.getlist('s3rpath-hidden')
-        print(f'urls:{urls}')
-        print(f'rpath:{rpaths}')
-        project_files = [{"file_name": file_name, "s3_link": url, "relative_s3_path": rpath,"file_type": "META_DATA"}
-                         for (file_name, url, rpath) in zip(file_names,urls,rpaths)]
-        print(project_files)
-        response = requests.post(host + url_for('file_api.create_file'),
-                                 json={'project_id': session.get('project_id'), 'files': project_files,
-                                       'user_id': session.get('user_id')},
-                                 headers={'token_id': session.get('token_id'),
-                                          'access_token': session.get('access_token')})
-        print(response.json())
-        if response.json().get('message') == "SUCCESS":
-            return render_template('upload-success.html', form=form)
-        else:
-            flash(response.json().get('message'))
+    print('Reached map meta data..')
+    form = MapMetadataForm()
+    print(request.form.getlist('file_name'))
+    print(request.form.getlist('file_id'))
+    print(request.form.getlist('column_select'))
+    print(request.form.getlist('join_select'))
+    file_names = set(request.form.getlist('file_name'))
+    select_columns = request.form.getlist('column_select')
+    join_columns = request.form.getlist('join_select')
+    selected_columns = {}
+    to_join_columns = {}
+    joins = []
+    for table in select_columns:
+        col, id_html = table.split(';')
+        print(col)
+        print(id_html)
+        id = id_html.split('value="')[1][:-2]
+        selected_columns[id] = selected_columns.get(id,[]) + [col]
+    print(selected_columns)
+    for table in join_columns:
+        col, id_html = table.split(';')
+        id = id_html.split('value="')[1][:-2]
+        to_join_columns[id] = to_join_columns.get(id,[]) + [col]
+    print(selected_columns)
+    print(to_join_columns)
+    for ind, file_id in enumerate(selected_columns):
+        joins.append({'file_id_'+str(ind+1):file_id,
+                      'columns_for_file_'+str(ind+1):selected_columns.get(file_id),
+                      'join_column_for_file_'+str(ind+1):to_join_columns.get(file_id)[0]})
+    print(joins)
+    joins_flat = [{k: v for d in joins for k, v in d.items()}]
+    print(joins_flat)
+    response = requests.post(host + url_for('join_api.create_joins'),
+                             json={'project_id': session.get('project_id'), 'joins': joins_flat,
+                                   'user_id': session.get('user_id')},
+                             headers={'token_id': session.get('token_id'),
+                                      'access_token': session.get('access_token')})
+    print(response.json())
+    if response.json().get('message') == "SUCCESS":
+        return render_template('upload-success.html', form=form)
+    else:
+        flash(response.json().get('message'))
     return render_template('map-metadata-files.html', form=form)
 
 
@@ -475,7 +511,6 @@ def logout():
     print(f'In logout..')
     session['logged_in'] = False
     return redirect(url_for('index'))
-
 
 
 if __name__ == '__main__':

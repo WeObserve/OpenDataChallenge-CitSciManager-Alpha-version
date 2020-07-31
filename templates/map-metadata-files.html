@@ -25,53 +25,63 @@
           </ol>
         </nav>
         <br/>
-        <form action="{{url_for('post_map_metadata_files') }}" method="POST" role="form" enctype="multipart/form-data">
+        <form action="{{url_for('post_map_metadata_files') }}" method="POST" role="form">
             {{ form.hidden_tag() }}
+            {% for subform in form.metadata_form_columns %}
+
             <div class="row">
-                <div class="col-md-6">
-                    <h4>Attach Metadata</h4>
-                    <div class="form-field">
-                        {{form.upload_metadata_form.file_type.label}}
-                        {{form.upload_metadata_form.file_type}}
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <p>Select and upload all the metadata files you want to associate to your project. Currently, we
-                    support only CSV files (upto 2GB) with single row headers. File names must be unique and relevant and
-                        will be used to fetch headers for mapping.</p>
+                <h4>{{ subform.file_name.data }} </h4>
+                <div class="card">
+                    <div class="container-narrow">
+                        <table class="table-condensed table-responsive">
+                            <thead>
+                                <tr>
+                                    <th>Columns</th>
+                                    <th>Select Column To Include</th>
+                                    <th>Select Column to Join (Only 1)</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for column in subform.file_columns %}
+                                            <tr>
+                                            <td>{{ column.data }}</td>
+                                            <td>
+                                                <label class="checkbox" style="padding-left: 25px">
+                                                    <input type="checkbox"  name ="column_select"
+                                                           value="{{ column.data+';'
+                                                           + subform.file_id.data | string }}">
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <label class="checkbox" style="padding-left: 25px">
+                                                    <input type="checkbox"  name ="join_select"
+                                                           value="{{ column.data+';'+
+                                                           subform.file_id.data | string }}">
+                                                </label>
+                                            </td>
+
+                                            </tr>
+                                         {% endfor %}
+                            </tbody>
+                    </table>
                 </div>
             </div>
+                </div>
+            {% endfor %}
+
             <div class="row">
-                <div class="col-md-6">
-                    <div class="form-field">
-                        {{form.upload_metadata_form.data_files}}
-                    </div>
-                    <div class="filenames"></div>
-                    <div class="filesize"></div>
-                    <div class="urls"></div>
-                    <div class="relative-paths"></div>
-                    {% for error in form.upload_metadata_form.data_files.errors %}
-                        <small class="text-danger">{{ error }}</small>
-                    {% endfor %}
+                <div class="col-md-6"></div>
+                <div class="col-md-3">
+                    <a class="btn btn-primary disabled" href="{{request.referrer}}">Back</a>
                 </div>
-                <div class="col-md-6">
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                </div>
-                <div class="col-md-2">
-                </div>
-                 <div class="col-md-2">
-                     <a class="btn btn-primary disabled" href="{{request.referrer}}">Back</a>
-                </div>
-                <div class="col-md-2">
-                     <button type="submit" name="upload-raw-data-files" class="btn btn-primary">Submit</button>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary pull-left">Done</button>
                 </div>
             </div>
         </form>
+            </div>
         <br/>
     </div>
-  </div>
 
 {% endblock content %}

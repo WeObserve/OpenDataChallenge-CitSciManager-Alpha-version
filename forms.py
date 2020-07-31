@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import SelectField, FieldList, FormField, StringField, TextAreaField, SubmitField, PasswordField, \
-    BooleanField, MultipleFileField, HiddenField
+    BooleanField, MultipleFileField, HiddenField, widgets, SelectMultipleField
 from wtforms.validators import DataRequired, Length, Email, EqualTo
 from flask_wtf.file import FileAllowed, FileRequired
 
@@ -37,6 +37,16 @@ class UploadDataFilesForm(FlaskForm):
 class UploadMetadataForm(FlaskForm):
     meta_file_type = SelectField(u'Select Type of Files', choices=[('csv', 'CSV')])
     meta_data_files = MultipleFileField(u'Data Files', id='metadata_files')
+
+
+class MetadataFileForm(FlaskForm):
+    file_id = HiddenField('File Id')
+    file_name = StringField('File Name')
+    file_columns = FieldList(StringField('File Columns'))
+
+
+class MapMetadataForm(FlaskForm):
+    metadata_form_columns = FieldList(FormField(MetadataFileForm))
 
 
 class DataProcessorForm(FlaskForm):

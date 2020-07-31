@@ -138,3 +138,7 @@ a.article-title:hover {
 .btn-collect{
   padding: 25px;
 }
+
+input#file_name {
+    width: 400px;
+}

@@ -57,10 +57,14 @@ def check_if_these_file_ids_exist_for_this_project(db_connection, create_joins_r
             "status": "PENDING"
         })
 
+    print(file_ids)
+
     file_object_ids = []
 
     for file_id in file_ids:
         file_object_ids.append(ObjectId(file_id))
+    print(file_object_ids)
+    print(create_joins_request_dto.project_id)
 
     file_cursor = files_dao.get_files(db_connection, {
         "_id": {
@@ -70,6 +74,9 @@ def check_if_these_file_ids_exist_for_this_project(db_connection, create_joins_r
         "status": "PROCESSED",
         "file_type": "META_DATA"
     })
+
+    for doc in file_cursor:
+        print(doc)
 
     if file_cursor is None or file_cursor.count() != len(file_object_ids):
         raise Exception("Some of these files are not PROCESSED or not a part of this project")
