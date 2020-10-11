@@ -92,12 +92,18 @@ def process_uploaded_files():
 
             files_dao.update_file(mongo_db_connection, {"_id": uploaded_file_to_process["_id"]}, {"$set": {"status": "PROCESSING"}})
 
-            bucket_name = uploaded_file_to_process["s3_link"][8:].split('.')[0]
+            bucket_name = uploaded_file_to_process["file_link"][8:].split('.')[0]
 
-            url = 's3n://' + bucket_name + "/" + uploaded_file_to_process["relative_path"]
+            index = 0
 
-            if uploaded_file_to_process["relative_path"][0] == "/":
-                url = 's3n://' + bucket_name + uploaded_file_to_process["relative_path"]
+            for ch in uploaded_file_to_process["file_link"][8:]:
+                if ch == '/':
+                    break
+                index = index + 1
+
+            index = index + 1
+
+            url = 's3n://' + bucket_name + "/" + uploaded_file_to_process["file_link"][index + 1]
 
             log_to_file(url + "\n")
 
@@ -138,17 +144,32 @@ def process_uploaded_files():
                 if str(file["_id"]) == str(pending_join_to_process["file_id_2"]):
                     file2 = file
 
-            bucket_name_for_file_1 = file1["s3_link"][8:].split('.')[0]
-            bucket_name_for_file_2 = file2["s3_link"][8:].split('.')[0]
+            bucket_name_for_file_1 = file1["file_link"][8:].split('.')[0]
+            bucket_name_for_file_2 = file2["file_link"][8:].split('.')[0]
 
-            url_for_file_1 = 's3n://' + bucket_name_for_file_1 + "/" + file1["relative_path"]
-            url_for_file_2 = 's3n://' + bucket_name_for_file_2 + "/" + file2["relative_path"]
+            index = 0
 
-            if file1["relative_path"][0] == "/":
-                url = 's3n://' + bucket_name_for_file_1 + file1["relative_path"]
+            for ch in file1["file_link"][8:]:
+                if ch == '/':
+                    break
+                index = index + 1
 
-            if file2["relative_path"][0] == "/":
-                url = 's3n://' + bucket_name_for_file_2 + file2["relative_path"]
+            index = index + 1
+
+            url_for_file_1 = 's3n://' + bucket_name_for_file_1 + "/" + file1["file_link"][index:]
+
+
+            index = 0
+
+            for ch in file2["file_link"][8:]:
+                if ch == '/':
+                    break
+                index = index + 1
+
+            index = index + 1
+
+            url_for_file_2 = 's3n://' + bucket_name_for_file_2 + "/" + file2["file_link"][index:]
+
 
             log_to_file(url_for_file_1 + "\n")
 
@@ -192,11 +213,10 @@ def process_uploaded_files():
                 f.write(bytes_to_write)
 
             file_dict = {
-                "file_name": str(pending_join_to_process["_id"]) + ".csv",
-                "s3_link": "https://" + bucket_name_for_file_1 + ".s3-us-west-2.amazonaws.com/joins/" + str(pending_join_to_process["_id"]) + ".csv",
-                "relative_path": "joins/" + str(pending_join_to_process["_id"]) + ".csv",
+                "name": str(pending_join_to_process["_id"]) + ".csv",
+                "file_link": "https://" + bucket_name_for_file_1 + ".s3-us-west-2.amazonaws.com/joins/" + str(pending_join_to_process["_id"]) + ".csv",
                 "project_id": pending_join_to_process["project_id"],
-                "creator_id": pending_join_to_process["user_id"],
+                "uploaded_by_user_id": pending_join_to_process["user_id"],
                 "status": "PROCESSED",
                 "headers": df.columns,
                 "file_type": "META_DATA"
@@ -206,7 +226,7 @@ def process_uploaded_files():
 
             user = users_dao.get_users(mongo_db_connection, {"_id": pending_join_to_process["user_id"]})[0]
 
-            send_join_done_email(User(user), env, file_dict["s3_link"], config[env].email_sender_address)
+            send_join_done_email(User(user), env, file_dict["file_link"], config[env].email_sender_address)
 
             joins_dao.update_join(mongo_db_connection, {"_id": pending_join_to_process["_id"]}, {"$set": {"status": "PROCESSED"}})
 
