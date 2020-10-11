@@ -20,8 +20,7 @@ def log_to_file(strng):
 log_to_file("About to start\n")
 
 spark = SparkSession.builder \
-            .appName("app_name") \
-            .getOrCreate()
+            .appName("app_name") 
 
 spark._jsc.hadoopConfiguration().set("fs.s3n.awsAccessKeyId", config[env].access_key_id)
 spark._jsc.hadoopConfiguration().set("fs.s3n.awsSecretAccessKey", config[env].secret_access_key)
@@ -116,8 +115,6 @@ def process_uploaded_files():
 
         else:
             pending_join_to_process = pending_joins_cursor[0]
-
-            log_to_file(str(pending_join_to_process))
 
             joins_dao.update_join(mongo_db_connection, {"_id": pending_join_to_process["_id"]}, {"$set": {"status": "PROCESSING"}})
 

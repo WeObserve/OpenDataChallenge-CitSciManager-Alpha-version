@@ -10,8 +10,6 @@ class User():
         self.email = user_dict["email"]
         self.password = user_dict["password"]
         self.name = user_dict["name"]
-        self.organisation_name = user_dict["organisation_name"]
-        self.organisation_affiliation = user_dict["organisation_affiliation"]
 
     def convert_to_dict(self):
         print(self.__class__.__name__ + ": Inside convert_to_dict")
@@ -21,6 +19,4 @@ class User():
             "email": self.email,
             "password": self.password,
             "name": self.name,
-            "organisation_name": self.organisation_name,
-            "organisation_affiliation": self.organisation_affiliation
         }
