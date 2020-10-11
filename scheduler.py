@@ -94,7 +94,7 @@ def process_uploaded_files():
 
             bucket_name = uploaded_file_to_process["file_link"][8:].split('.')[0]
 
-            index = 0
+            index = 8
 
             for ch in uploaded_file_to_process["file_link"][8:]:
                 if ch == '/':
@@ -147,7 +147,7 @@ def process_uploaded_files():
             bucket_name_for_file_1 = file1["file_link"][8:].split('.')[0]
             bucket_name_for_file_2 = file2["file_link"][8:].split('.')[0]
 
-            index = 0
+            index = 8
 
             for ch in file1["file_link"][8:]:
                 if ch == '/':
@@ -159,7 +159,7 @@ def process_uploaded_files():
             url_for_file_1 = 's3n://' + bucket_name_for_file_1 + "/" + file1["file_link"][index:]
 
 
-            index = 0
+            index = 8
 
             for ch in file2["file_link"][8:]:
                 if ch == '/':
