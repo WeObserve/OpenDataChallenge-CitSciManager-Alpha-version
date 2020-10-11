@@ -117,6 +117,8 @@ def process_uploaded_files():
         else:
             pending_join_to_process = pending_joins_cursor[0]
 
+            log_to_file(str(pending_join_to_process))
+
             joins_dao.update_join(mongo_db_connection, {"_id": pending_join_to_process["_id"]}, {"$set": {"status": "PROCESSING"}})
 
             files_to_be_joined_cursor = files_dao.get_files(mongo_db_connection, {
