@@ -103,7 +103,7 @@ def process_uploaded_files():
 
             index = index + 1
 
-            url = 's3n://' + bucket_name + "/" + uploaded_file_to_process["file_link"][index + 1]
+            url = 's3n://' + bucket_name + "/" + uploaded_file_to_process["file_link"][index:]
 
             log_to_file(url + "\n")
 
