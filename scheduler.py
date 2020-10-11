@@ -20,7 +20,7 @@ def log_to_file(strng):
 log_to_file("About to start\n")
 
 spark = SparkSession.builder \
-            .appName("app_name") 
+            .appName("app_name").getOrCreate()
 
 spark._jsc.hadoopConfiguration().set("fs.s3n.awsAccessKeyId", config[env].access_key_id)
 spark._jsc.hadoopConfiguration().set("fs.s3n.awsSecretAccessKey", config[env].secret_access_key)
